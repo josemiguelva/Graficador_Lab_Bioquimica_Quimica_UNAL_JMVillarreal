@@ -1,0 +1,16 @@
+{
+  "name": "Analizador Lab - Prof. Villarreal",
+  "short_name": "AnalizadorQuímica",
+  "description": "Herramienta de análisis estadístico y cinético para la Universidad Nacional de Colombia",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3498db",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1048/1048953.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

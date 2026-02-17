@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador Lab - Prof. Villarreal (V-2025-10-14)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        }
+      };
+    </script>
+
+
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 5px; font-size: 2em; }
+        .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 25px; font-size: 0.9em; }
+        
+        .section-box {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Área de Pegado */
+        .paste-area {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            background: #f0f8ff;
+            font-family: monospace;
+            font-size: 0.9em;
+            resize: vertical;
+        }
+
+        /* Inputs de Títulos */
+        .title-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .title-inputs label { font-weight: bold; font-size: 0.9em; display: block; margin-bottom: 5px; }
+        .title-inputs input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+
+        /* Botones */
+        button {
+            background: #3498db; color: white; border: none; padding: 8px 15px;
+            border-radius: 5px; cursor: pointer; font-weight: 600; transition: 0.2s; margin: 2px;
+        }
+        button:hover { background: #2980b9; transform: translateY(-1px); }
+        button.secondary { background: #95a5a6; }
+        button.secondary:hover { background: #7f8c8d; }
+        button.success { background: #27ae60; }
+        button.success:hover { background: #2ecc71; }
+        button.danger { background: #e74c3c; }
+        button.danger:hover { background: #c0392b; }
+
+        /* Tabla de Datos */
+        .data-table-wrapper { overflow-x: auto; margin-top: 15px; max-height: 400px; border: 1px solid #eee; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        th, td { border: 1px solid #ddd; padding: 5px; text-align: center; }
+        th { background: #34495e; color: white; position: sticky; top: 0; z-index: 10; }
+        input[type="text"].cell-input { 
+            width: 100%; border: none; background: transparent; text-align: center; font-size:1em; 
+        }
+        input[type="text"].cell-input:focus { outline: 2px solid #3498db; background: white; }
+
+        /* Resultados */
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
+        .result-card { background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid #3498db; }
+        
+        .recommendation-box { padding: 15px; border-radius: 8px; margin-top: 20px; border: 1px solid transparent; }
+        .recommendation-box.good { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .recommendation-box.bad { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        
+        .chart-container { position: relative; height: 500px; width: 100%; margin: 20px 0; }
+        
+        /* Panel Fórmulas */
+        .formula-box { background: #fff; padding: 20px; border-radius: 10px; margin-top: 30px; border: 1px solid #ddd; }
+        .formula-item { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #eee; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            .chart-container { height: 400px; page-break-inside: avoid; }
+            .result-card, .formula-box { page-break-inside: avoid; border: 1px solid #ccc; }
+        }
+    </style>
+	
+	<meta name="theme-color" content="#3498db">
+<link rel="manifest" href="manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js');
+    });
+  }
+</script>
+
+</head>
+<body>
+
+<div class="container">
+    <div class="no-print">
+        <h1>📊 Analizador de Datos Experimentales</h1>
+        <p class="subtitle">Profesor José Miguel Villarreal Departamento de Química</p>
+    </div>
+
+    <div class="section-box no-print">
+        <h3>1. Personalización de Gráfico</h3>
+        <div class="title-inputs">
+            <div>
+                <label>Título del Gráfico:</label>
+                <input type="text" id="customChartTitle" value="Análisis de Datos Experimentales">
+            </div>
+            <div>
+                <label>Etiqueta Eje X:</label>
+                <input type="text" id="customXTitle" value="Concentración [mM]">
+            </div>
+            <div>
+                <label>Etiqueta Eje Y:</label>
+                <input type="text" id="customYTitle" value="Absorbancia (u.a.)">
+            </div>
+        </div>
+    </div>
+
+    <div class="section-box no-print">
+        <h3>2. Ingreso de Datos</h3>
+        
+        <div style="margin-bottom: 20px;">
+            <p style="margin-bottom: 5px; font-size: 0.9em; color:#555;">
+                <strong>Pegado Inteligente:</strong> Copia desde Excel/Sheets. 
+                <span style="color: green; font-weight: bold;">✔ Soporta: comas (,), puntos (.) y notación científica (1E-2, 1e-2).</span>
+            </p>
+            <textarea id="pasteArea" class="paste-area" placeholder="Pega aquí tus celdas..."></textarea>
+            <div style="margin-top: 5px; text-align: right;">
+                <label style="margin-right: 15px; font-size: 0.9em;"><input type="checkbox" id="hasHeadersPaste" checked> Con encabezados</label>
+                <button onclick="processPaste()" class="success">⚡ Procesar Texto</button>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top:15px;">
+            <button class="secondary" onclick="addYColumn()">➕ Columna Y</button>
+            <button class="secondary" onclick="addRow()">➕ Fila</button>
+            <button class="danger" onclick="clearData()">🗑️ Limpiar Todo</button>
+            <div style="margin-left: auto;">
+                <input type="file" id="fileInput" accept=".csv,.txt" style="font-size: 0.9em;">
+            </div>
+        </div>
+
+        <div class="data-table-wrapper">
+            <table id="dataTable">
+                <thead>
+                    <tr id="tableHeader">
+                        <th><input type="text" id="headerX" value="X" class="cell-input" style="color:white; font-weight:bold;"></th>
+                        <th><input type="text" id="headerY1" value="Y1" class="cell-input" style="color:white; font-weight:bold;"></th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section-box no-print">
+        <h3>3. Configuración del Análisis</h3>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+            <div>
+                <label>Modelo Matemático:</label>
+                <select id="modelSelect" style="padding: 5px; border-radius: 4px;">
+                    <option value="linear">Regresión Lineal (y = mx + b)</option>
+                    <option value="linearZero">Lineal (y = mx, Paso por 0)</option>
+                    <option value="michaelis">Michaelis-Menten</option>
+                </select>
+            </div>
+            <div>
+                <label><input type="checkbox" id="chkStats" checked> <strong>Calcular Promedios (Estadística)</strong></label>
+            </div>
+            <button class="success" onclick="runAnalysis()" style="padding: 10px 40px; font-size: 1.1em;">🚀 EJECUTAR ANÁLISIS</button>
+        </div>
+    </div>
+
+    <div id="reportSection" style="display: none;">
+        <div style="border-bottom: 2px solid #3498db; margin-bottom: 15px; padding-bottom: 5px; display:flex; justify-content:space-between;">
+            <h2>Resultados del Análisis</h2>
+            <span id="reportDate" style="color:#777;"></span>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="mainChart"></canvas>
+        </div>
+
+        <div class="no-print" style="text-align: center; margin-bottom: 20px;">
+            <button onclick="downloadImage()">🖼️ Descargar Imagen</button>
+            <button onclick="exportCSV()">📄 Descargar CSV</button>
+            <button class="secondary" onclick="window.print()">🖨️ Imprimir Reporte PDF</button>
+        </div>
+
+        <div id="numericResults" class="results-grid"></div>
+        
+        <div id="recommendationsContainer"></div>
+
+        <div id="statsTableContainer" style="margin-top: 30px; display: none;">
+            <h3>Tabla Estadística Detallada</h3>
+            <div class="data-table-wrapper">
+                <table id="statsTable"></table>
+            </div>
+        </div>
+
+        <div class="formula-box" id="formulaBox">
+            <h3>📚 Fórmulas Utilizadas</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div>
+                    <h4 style="color:#3498db;">Estadística Descriptiva</h4>
+                    <div class="formula-item">
+                        <strong>Promedio ($\bar{x}$):</strong>
+                        $$ \bar{x} = \frac{\sum_{i=1}^{n} x_i}{n} $$
+                    </div>
+                    <div class="formula-item">
+                        <strong>Desviación Estándar ($s$):</strong>
+                        $$ s = \sqrt{\frac{\sum (x_i - \bar{x})^2}{n-1}} $$
+                    </div>
+                    <div class="formula-item">
+                        <strong>Coeficiente de Variación ($CV$):</strong>
+                        $$ CV_{\%} = \left( \frac{s}{|\bar{x}|} \right) \times 100 $$
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color:#e74c3c;">Regresión Lineal</h4>
+                    <div id="regressionFormulas">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let myChart = null;
+    let colCount = 1;
+    const colors = ['#e74c3c', '#3498db', '#9b59b6', '#f1c40f', '#2ecc71', '#e67e22', '#1abc9c'];
+
+    // --- INICIALIZACIÓN ---
+    window.onload = function() {
+        for(let i=0; i<4; i++) addRow();
+    };
+
+    // --- RECONOCIMIENTO NUMÉRICO AVANZADO ---
+    // Esta función es la clave para leer 1,2 o 1.2 o 1E-2 por igual
+    function parseSmartNumber(val) {
+        if (!val) return NaN;
+        // 1. Convertir a string
+        let str = val.toString().trim();
+        // 2. Reemplazar coma por punto SI no es un CSV que ya se separó, 
+        //    sino un valor de celda individual (ej: "1,5").
+        //    Ojo: Si escriben 1,000 (mil) podría fallar, asumimos formato decimal latino
+        str = str.replace(',', '.');
+        // 3. Parsear
+        return parseFloat(str);
+    }
+
+    // --- GESTIÓN DE TABLA Y DATOS ---
+    function processPaste() {
+        const text = document.getElementById('pasteArea').value.trim();
+        if(!text) return;
+
+        // Detectar delimitador
+        const delim = text.includes('\t') ? '\t' : (text.includes(';') ? ';' : ',');
+        
+        Papa.parse(text, {
+            delimiter: delim,
+            skipEmptyLines: true,
+            complete: function(results) {
+                // Pasamos raw string data a rebuildTable para que use parseSmartNumber
+                rebuildTable(results.data, document.getElementById('hasHeadersPaste').checked);
+            }
+        });
+    }
+    
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        if(e.target.files[0]) {
+            Papa.parse(e.target.files[0], {
+                skipEmptyLines: true,
+                complete: function(res) { rebuildTable(res.data, true); }
+            });
+        }
+    });
+
+    function rebuildTable(matrix, hasHeader) {
+        if(matrix.length < 1) return;
+        const numCols = matrix[0].length;
+        if(numCols < 2) return alert("Se necesitan al menos 2 columnas (X, Y).");
+
+        // Configurar Headers
+        const headerRow = document.getElementById('tableHeader');
+        while(headerRow.children.length > 1) headerRow.removeChild(headerRow.lastChild);
+        
+        colCount = numCols - 1;
+        for(let i=0; i<colCount; i++) {
+            let th = document.createElement('th');
+            // Si hay header, tomamos el valor. Si no, generamos Y1, Y2...
+            let val = hasHeader ? matrix[0][i+1] : `Y${i+1}`;
+            th.innerHTML = `<input type="text" value="${val}" class="cell-input" style="color:white; font-weight:bold;">`;
+            headerRow.appendChild(th);
+        }
+        if(hasHeader) document.getElementById('headerX').value = matrix[0][0];
+
+        // Llenar Datos
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        let start = hasHeader ? 1 : 0;
+
+        for(let i=start; i<matrix.length; i++) {
+            let rowData = matrix[i];
+            let tr = document.createElement('tr');
+            // Usamos type="text" en inputs para permitir escribir "1,5" y luego parsearlo
+            let html = `<td><input type="text" class="cell-input x-val" value="${rowData[0] || ''}"></td>`;
+            for(let j=0; j<colCount; j++) {
+                html += `<td><input type="text" class="cell-input y-val" data-col="${j}" value="${rowData[j+1] !== undefined ? rowData[j+1] : ''}"></td>`;
+            }
+            tr.innerHTML = html;
+            tbody.appendChild(tr);
+        }
+    }
+
+    function addRow() {
+        const tr = document.createElement('tr');
+        let html = `<td><input type="text" class="cell-input x-val"></td>`;
+        for(let i=0; i<colCount; i++) html += `<td><input type="text" class="cell-input y-val" data-col="${i}"></td>`;
+        tr.innerHTML = html;
+        document.getElementById('tableBody').appendChild(tr);
+    }
+
+    function addYColumn() {
+        colCount++;
+        let th = document.createElement('th');
+        th.innerHTML = `<input type="text" value="Y${colCount}" class="cell-input" style="color:white; font-weight:bold;">`;
+        document.getElementById('tableHeader').appendChild(th);
+        document.querySelectorAll('#tableBody tr').forEach(tr => {
+            let td = document.createElement('td');
+            td.innerHTML = `<input type="text" class="cell-input y-val" data-col="${colCount-1}">`;
+            tr.appendChild(td);
+        });
+    }
+
+    function clearData() {
+        document.getElementById('pasteArea').value = '';
+        document.getElementById('tableBody').innerHTML = '';
+        colCount = 1;
+        // Reset Headers
+        const h = document.getElementById('tableHeader');
+        while(h.children.length > 2) h.removeChild(h.lastChild);
+        document.getElementById('headerY1').value = "Y1";
+        document.getElementById('reportSection').style.display = 'none';
+        for(let i=0; i<4; i++) addRow();
+    }
+
+    // --- ANÁLISIS ---
+    function runAnalysis() {
+        // 1. Recolección y Limpieza de Datos
+        const rows = document.querySelectorAll('#tableBody tr');
+        let data = [];
+        
+        rows.forEach(row => {
+            let xRaw = row.querySelector('.x-val').value;
+            let x = parseSmartNumber(xRaw);
+            
+            if(isNaN(x)) return; // Saltar si X no es válido
+
+            let ys = [];
+            row.querySelectorAll('.y-val').forEach(inp => {
+                let yVal = parseSmartNumber(inp.value);
+                if(!isNaN(yVal)) ys.push(yVal);
+            });
+
+            if(ys.length > 0) {
+                // Pre-cálculo estadístico por fila
+                let n = ys.length;
+                let mean = ys.reduce((a,b)=>a+b,0)/n;
+                let variance = n > 1 ? ys.reduce((a,b)=>a + Math.pow(b-mean, 2), 0) / (n-1) : 0;
+                let std = Math.sqrt(variance);
+                let cv = mean !== 0 ? (std / Math.abs(mean)) * 100 : 0;
+                data.push({ x, ys, mean, std, cv, n });
+            }
+        });
+
+        if(data.length < 2) return alert("Se requieren al menos 2 puntos válidos.");
+        data.sort((a,b) => a.x - b.x);
+
+        // 2. Preparación UI
+        document.getElementById('reportSection').style.display = 'block';
+        document.getElementById('reportDate').innerText = new Date().toLocaleString();
+        const model = document.getElementById('modelSelect').value;
+        const useStats = document.getElementById('chkStats').checked;
+        const customTitle = document.getElementById('customChartTitle').value;
+        const xTitle = document.getElementById('customXTitle').value;
+        const yTitle = document.getElementById('customYTitle').value;
+
+        // 3. Generación de Series (Datasets)
+        let datasets = [];
+        let resultsHTML = "";
+        
+        // Opción A: Promedios
+        if (useStats && colCount > 1) {
+            // Puntos Promedio
+            datasets.push({
+                label: 'Promedio Experimental',
+                data: data.map(d => ({x: d.x, y: d.mean})),
+                backgroundColor: 'black', borderColor: 'black',
+                pointRadius: 6, pointStyle: 'rectRot', type: 'scatter'
+            });
+            
+            // Barras de error (ahora más visibles)
+            data.forEach(d => {
+                if (d.std > 0) { // Solo graficar si hay desviación
+                    datasets.push({
+                        label: 'Error',
+                        data: [
+                            {x: d.x, y: d.mean - d.std}, 
+                            {x: d.x, y: d.mean + d.std}
+                        ],
+                        borderColor: 'rgba(231, 76, 60, 0.8)', // Un rojo suave para que resalte
+                        borderWidth: 2, // Más grueso
+                        showLine: true,
+                        pointRadius: 2, // Pequeños topes en los extremos
+                        pointBackgroundColor: 'rgba(231, 76, 60, 0.8)',
+                        type: 'line',
+                        fill: false,
+                        options: { animation: false }
+                    });
+                }
+            });
+
+            // Regresión al Promedio
+            let regData = data.map(d => ({x: d.x, y: d.mean}));
+            let res = performRegression(regData, model);
+            addTrendline(datasets, regData, res, 'black', 'Tendencia Promedio');
+            resultsHTML += makeResultCard("Ajuste (Promedios)", res, model);
+            
+            // Tabla y Avisos
+            fillStatsTable(data);
+            checkRecommendations(data);
+
+        } else {
+            // Opción B: Individuales
+            document.getElementById('statsTableContainer').style.display = 'none';
+            document.getElementById('recommendationsContainer').innerHTML = '';
+
+            for (let i = 0; i < colCount; i++) {
+                let pts = [];
+                data.forEach(d => {
+                    if (d.ys[i] !== undefined) pts.push({x: d.x, y: d.ys[i]});
+                });
+                
+                if(pts.length < 2) continue;
+
+                let colName = document.querySelectorAll('#tableHeader th input')[i+1].value;
+                let color = colors[i % colors.length];
+
+                datasets.push({
+                    label: colName,
+                    data: pts,
+                    backgroundColor: color, borderColor: color,
+                    pointRadius: 5, type: 'scatter'
+                });
+
+                // Regresión individual
+                let res = performRegression(pts, model);
+                addTrendline(datasets, pts, res, color, `Reg. ${colName}`);
+                resultsHTML += makeResultCard(colName, res, model);
+            }
+        }
+
+        // 4. Renderizar
+        document.getElementById('numericResults').innerHTML = resultsHTML;
+        renderMathFormulas(model);
+
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        if(myChart) myChart.destroy();
+        
+        myChart = new Chart(ctx, {
+            data: { datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true, text: customTitle, font: {size: 18} },
+                    legend: { labels: { filter: item => item.text !== 'Error' && !item.text.startsWith('Cap') } }
+                },
+                scales: {
+                    x: { type: 'linear', position: 'bottom', title: {display:true, text: xTitle, font:{weight:'bold'}} },
+                    y: { type: 'linear', title: {display:true, text: yTitle, font:{weight:'bold'}} }
+                }
+            }
+        });
+        
+        MathJax.typesetPromise();
+    }
+
+    // --- MATEMÁTICAS ---
+    function performRegression(data, model) {
+        let n = data.length;
+        let sX=0, sY=0, sXY=0, sX2=0;
+        data.forEach(p => { sX+=p.x; sY+=p.y; sXY+=p.x*p.y; sX2+=p.x*p.x; });
+
+        if(model === 'linearZero') {
+            let m = sXY / sX2;
+            // R2 sin intercepto
+            let ssRes = data.reduce((a,p) => a + Math.pow(p.y - m*p.x, 2), 0);
+            let ssTot = data.reduce((a,p) => a + Math.pow(p.y, 2), 0);
+            let r2 = 1 - (ssRes/ssTot);
+            return { m, b:0, r2, type: 'linearZero' };
+        } 
+        else if (model === 'linear') {
+            let m = (n*sXY - sX*sY) / (n*sX2 - sX*sX);
+            let b = (sY - m*sX) / n;
+            let yMean = sY/n;
+            let ssRes = data.reduce((a,p) => a + Math.pow(p.y - (m*p.x + b), 2), 0);
+            let ssTot = data.reduce((a,p) => a + Math.pow(p.y - yMean, 2), 0);
+            let r2 = 1 - (ssRes/ssTot);
+            return { m, b, r2, type: 'linear' };
+        }
+        else if (model === 'michaelis') {
+            // Lineweaver-Burk
+            let inv = data.map(p=>({x:1/p.x, y:1/p.y})).filter(p=>isFinite(p.x)&&isFinite(p.y)&&p.x!==0);
+            if(inv.length<2) return {Vmax:0,Km:0,r2:0,type:'michaelis'};
+            
+            // Regresión simple a los inversos
+            let ni=inv.length, siX=0, siY=0, siXY=0, siX2=0;
+            inv.forEach(p=>{siX+=p.x; siY+=p.y; siXY+=p.x*p.y; siX2+=p.x*p.x;});
+            let mLB = (ni*siXY - siX*siY)/(ni*siX2 - siX*siX);
+            let bLB = (siY - mLB*siX)/ni;
+            
+            return { Vmax: 1/bLB, Km: mLB*(1/bLB), r2:0, type:'michaelis' };
+        }
+    }
+
+    function addTrendline(datasets, pts, res, color, label) {
+        if(!res) return;
+        let minX = pts[0].x, maxX = pts[pts.length-1].x;
+        let line = [];
+        if(res.type.includes('linear')) {
+            line = [{x: minX, y: res.m*minX+res.b}, {x: maxX, y: res.m*maxX+res.b}];
+        } else if (res.type === 'michaelis') {
+            for(let x=0; x<=maxX; x+=maxX/40) line.push({x, y: (res.Vmax*x)/(res.Km+x)});
+        }
+        datasets.push({
+            label: label, data: line, borderColor: color, borderWidth: 2, 
+            borderDash: [5,5], pointRadius: 0, showLine: true, type: 'line'
+        });
+    }
+
+    function makeResultCard(title, res, model) {
+        let html = `<div class="result-card"><h4>${title}</h4>`;
+        if(res.type.includes('linear')) {
+            let eq = `y = ${res.m.toFixed(4)}x`;
+            if(model==='linear' && res.b >= 0) eq += ` + ${res.b.toFixed(4)}`;
+            else if (model==='linear' && res.b < 0) eq += ` - ${Math.abs(res.b).toFixed(4)}`;
+            
+            html += `<div style="font-family:monospace; font-weight:bold; margin:5px 0;">${eq}</div>`;
+            html += `<div>R² = ${res.r2.toFixed(4)}</div>`;
+            if(model==='linearZero') html += `<small>(Intercepto forzado a 0)</small>`;
+        } else {
+            html += `<div>Vmax = ${res.Vmax.toFixed(4)}</div><div>Km = ${res.Km.toFixed(4)}</div>`;
+        }
+        return html + `</div>`;
+    }
+
+    // --- VISUALIZACIÓN EDUCATIVA ---
+    function renderMathFormulas(model) {
+        let container = document.getElementById('regressionFormulas');
+        let html = "";
+        
+        if (model === 'linear') {
+            html = `
+                <div class="formula-item">
+                    <strong>Modelo: $y = mx + b$</strong>
+                </div>
+                <div class="formula-item">
+                    $$ m = \\frac{n\\sum xy - \\sum x \\sum y}{n\\sum x^2 - (\\sum x)^2} $$
+                </div>
+                <div class="formula-item">
+                    $$ b = \\bar{y} - m\\bar{x} $$
+                </div>
+                <div class="formula-item">
+                    $$ R^2 = 1 - \\frac{SS_{res}}{SS_{tot}} $$
+                </div>
+            `;
+        } else if (model === 'linearZero') {
+            html = `
+                <div class="formula-item">
+                    <strong>Modelo: $y = mx$ (Paso por cero)</strong>
+                </div>
+                <div class="formula-item">
+                    $$ m = \\frac{\\sum (xy)}{\\sum (x^2)} $$
+                </div>
+                <div class="formula-item">
+                    $$ b = 0 \\quad (Forzado) $$
+                </div>
+            `;
+        } else if (model === 'michaelis') {
+            html = `
+                <div class="formula-item">
+                    <strong>Modelo Michaelis-Menten:</strong>
+                    $$ v = \\frac{V_{max}[S]}{K_m + [S]} $$
+                </div>
+                <div class="formula-item">
+                    Linealización (Lineweaver-Burk):
+                    $$ \\frac{1}{v} = \\frac{K_m}{V_{max}} \\cdot \\frac{1}{[S]} + \\frac{1}{V_{max}} $$
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+
+    function fillStatsTable(data) {
+        document.getElementById('statsTableContainer').style.display = 'block';
+        let html = `<thead><tr><th>X</th><th>Promedio</th><th>Desv. Std</th><th>CV (%)</th></tr></thead><tbody>`;
+        data.forEach(d => {
+            let style = d.cv > 20 ? 'color:red; font-weight:bold;' : (d.cv > 10 ? 'color:orange;' : 'color:green;');
+            html += `<tr><td>${d.x}</td><td>${d.mean.toFixed(4)}</td><td>${d.std.toFixed(4)}</td><td style="${style}">${d.cv.toFixed(2)}%</td></tr>`;
+        });
+        document.getElementById('statsTable').innerHTML = html + "</tbody>";
+    }
+
+    function checkRecommendations(data) {
+        let bad = data.filter(d => d.cv > 20).length;
+        let div = document.getElementById('recommendationsContainer');
+        if(bad > 0) div.innerHTML = `<div class="recommendation-box bad">⚠️ <strong>Advertencia:</strong> Hay ${bad} puntos con coeficiente de variación > 20%.</div>`;
+        else div.innerHTML = `<div class="recommendation-box good">✅ <strong>Datos Excelentes:</strong> Baja variabilidad en réplicas.</div>`;
+    }
+
+    // --- UTILIDADES ---
+    function downloadImage() { 
+        let a = document.createElement('a'); 
+        a.href = document.getElementById('mainChart').toDataURL(); 
+        a.download = 'grafico_analisis.png'; 
+        a.click(); 
+    }
+    
+    function exportCSV() {
+        let csv = [];
+        // Headers
+        let headers = [];
+        document.querySelectorAll('#tableHeader th input').forEach(inp => headers.push(inp.value));
+        csv.push(headers.join(","));
+        
+        // Rows
+        document.querySelectorAll('#tableBody tr').forEach(tr => {
+            let row = [];
+            tr.querySelectorAll('input').forEach(inp => row.push(inp.value));
+            csv.push(row.join(","));
+        });
+        
+        let blob = new Blob([csv.join("\n")], {type: 'text/csv'});
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a'); a.href = url; a.download = 'datos_exportados.csv'; a.click();
+    }
+</script>
+</body>
+</html>
