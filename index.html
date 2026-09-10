@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analizador Lab - Prof. Villarreal (V-2025-10-14)</title>
+    <title>Analizador Lab - Prof. Villarreal (V-2026-09-10)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-
+    
     <script>
       window.MathJax = {
         tex: {
@@ -15,105 +14,74 @@
         }
       };
     </script>
-
-
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
+
+    <!-- Plugins opcionales de Chart.js: líneas de referencia y zoom/pan.
+         Si el usuario no tiene internet o el CDN falla, el programa sigue funcionando
+         perfectamente sin estas dos funciones extra (ver comprobación defensiva en el script). -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #333;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; padding: 20px; color: #333; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         h1 { text-align: center; color: #2c3e50; margin-bottom: 5px; font-size: 2em; }
         .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 25px; font-size: 0.9em; }
-        
-        .section-box {
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #e0e0e0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        /* Área de Pegado */
-        .paste-area {
-            width: 100%;
-            height: 80px;
-            padding: 10px;
-            border: 2px dashed #3498db;
-            border-radius: 8px;
-            background: #f0f8ff;
-            font-family: monospace;
-            font-size: 0.9em;
-            resize: vertical;
-        }
-
-        /* Inputs de Títulos */
-        .title-inputs {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-        }
+        .section-box { background: #fff; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #e0e0e0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .paste-area { width: 100%; height: 80px; padding: 10px; border: 2px dashed #3498db; border-radius: 8px; background: #f0f8ff; font-family: monospace; font-size: 0.9em; resize: vertical; }
+        .title-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; background: #f8f9fa; padding: 15px; border-radius: 8px; }
         .title-inputs label { font-weight: bold; font-size: 0.9em; display: block; margin-bottom: 5px; }
-        .title-inputs input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
-
-        /* Botones */
-        button {
-            background: #3498db; color: white; border: none; padding: 8px 15px;
-            border-radius: 5px; cursor: pointer; font-weight: 600; transition: 0.2s; margin: 2px;
-        }
+        .title-inputs input, .title-inputs select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+        button { background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: 600; transition: 0.2s; margin: 2px; }
         button:hover { background: #2980b9; transform: translateY(-1px); }
+        button:disabled { background: #bdc3c7; cursor: not-allowed; transform: none; }
         button.secondary { background: #95a5a6; }
         button.secondary:hover { background: #7f8c8d; }
         button.success { background: #27ae60; }
         button.success:hover { background: #2ecc71; }
         button.danger { background: #e74c3c; }
         button.danger:hover { background: #c0392b; }
-
-        /* Tabla de Datos */
+        button.small { padding: 5px 10px; font-size: 0.85em; }
         .data-table-wrapper { overflow-x: auto; margin-top: 15px; max-height: 400px; border: 1px solid #eee; }
         table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
         th, td { border: 1px solid #ddd; padding: 5px; text-align: center; }
         th { background: #34495e; color: white; position: sticky; top: 0; z-index: 10; }
-        input[type="text"].cell-input { 
-            width: 100%; border: none; background: transparent; text-align: center; font-size:1em; 
-        }
+        input[type="text"].cell-input { width: 100%; border: none; background: transparent; text-align: center; font-size:1em; }
         input[type="text"].cell-input:focus { outline: 2px solid #3498db; background: white; }
-
-        /* Resultados */
+        input.col-color-input { width: 30px; height: 20px; padding: 0; border: 1px solid #fff; border-radius: 3px; margin-top: 3px; cursor: pointer; background: transparent; }
+        .col-style-row { display: flex; gap: 3px; margin-top: 4px; justify-content: center; flex-wrap: wrap; }
+        select.col-mini-select { font-size: 0.68em; padding: 1px; max-width: 62px; border-radius: 3px; border: 1px solid #ccc; }
         .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
         .result-card { background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid #3498db; }
-        
         .recommendation-box { padding: 15px; border-radius: 8px; margin-top: 20px; border: 1px solid transparent; }
         .recommendation-box.good { background: #d4edda; color: #155724; border-color: #c3e6cb; }
         .recommendation-box.bad { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
-        
         .chart-container { position: relative; height: 500px; width: 100%; margin: 20px 0; }
-        
-        /* Panel Fórmulas */
+        .chart-container.small { height: 220px; }
         .formula-box { background: #fff; padding: 20px; border-radius: 10px; margin-top: 30px; border: 1px solid #ddd; }
         .formula-item { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #eee; }
 
+        /* ===== Estilos nuevos (Rev. 2026-09-10) ===== */
+        .subrow { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-top: 12px; }
+        .field-block { display: flex; flex-direction: column; gap: 4px; }
+        .field-block label { font-weight: bold; font-size: 0.85em; color: #444; }
+        .field-block select, .field-block input[type=text], .field-block input[type=number] { padding: 6px; border: 1px solid #ccc; border-radius: 5px; }
+        .hint-text { font-size: 0.8em; color: #7f8c8d; margin-top: 4px; }
+        .toggle-group { display: inline-flex; border: 1px solid #3498db; border-radius: 6px; overflow: hidden; }
+        .toggle-group button { margin: 0; border-radius: 0; background: white; color: #3498db; }
+        .toggle-group button.active { background: #3498db; color: white; }
+        .toggle-group button:hover { transform: none; }
+        .ref-line-list { list-style: none; margin-top: 10px; }
+        .ref-line-list li { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #f8f9fa; border-radius: 6px; margin-bottom: 5px; font-size: 0.9em; }
+        .ref-line-list li .swatch { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+        .ref-line-list li button { margin-left: auto; padding: 2px 8px; }
+        .toolbar-zoom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: #f8f9fa; padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 0.85em; color: #555; }
+        .badge-outlier { color: #e74c3c; font-weight: bold; }
+        .badge-warn { color: #e67e22; font-weight: bold; }
+        .plugin-status { font-size: 0.78em; color: #95a5a6; margin-top: 6px; }
+        .interp-note { font-size: 0.85em; color: #555; background: #fff8e1; border: 1px solid #ffe0a3; padding: 8px 12px; border-radius: 6px; margin: 10px 0; }
         @media print {
             .no-print { display: none !important; }
             .container { box-shadow: none; padding: 0; max-width: 100%; }
@@ -121,24 +89,13 @@
             .result-card, .formula-box { page-break-inside: avoid; border: 1px solid #ccc; }
         }
     </style>
-	
-	<meta name="theme-color" content="#3498db">
-<link rel="manifest" href="manifest.json">
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js');
-    });
-  }
-</script>
-
 </head>
 <body>
 
 <div class="container">
     <div class="no-print">
         <h1>📊 Analizador de Datos Experimentales</h1>
-        <p class="subtitle">Profesor José Miguel Villarreal - Departamento de Química - UNiversidad Nacional de Colombia</p>
+        <p class="subtitle">Profesor José Miguel Villarreal | Departamento de Química | Universidad Nacional de Colombia</p>
     </div>
 
     <div class="section-box no-print">
@@ -156,16 +113,31 @@
                 <label>Etiqueta Eje Y:</label>
                 <input type="text" id="customYTitle" value="Absorbancia (u.a.)">
             </div>
+            <div>
+                <label>Escala Eje X:</label>
+                <select id="xScaleType"><option value="linear">Lineal</option><option value="logarithmic">Logarítmica</option></select>
+            </div>
+            <div>
+                <label>Escala Eje Y:</label>
+                <select id="yScaleType"><option value="linear">Lineal</option><option value="logarithmic">Logarítmica</option></select>
+            </div>
+            <div>
+                <label>Ejes cartesianos (X=0, Y=0):</label>
+                <select id="axisEmphasisMode">
+                    <option value="auto" selected>Automático (si hay valores negativos)</option>
+                    <option value="always">Siempre resaltar</option>
+                    <option value="never">Nunca</option>
+                </select>
+            </div>
         </div>
     </div>
 
     <div class="section-box no-print">
         <h3>2. Ingreso de Datos</h3>
-        
         <div style="margin-bottom: 20px;">
             <p style="margin-bottom: 5px; font-size: 0.9em; color:#555;">
-                <strong>Pegado Inteligente:</strong> Copia desde Excel/Sheets. 
-                <span style="color: green; font-weight: bold;">✔ Soporta: comas (,), puntos (.) y notación científica (1E-2, 1e-2).</span>
+                <strong>Pegado Inteligente:</strong> Copia desde Excel/Sheets.
+                <span style="color: green; font-weight: bold;">✔ Ignora automáticamente columnas estadísticas previas.</span>
             </p>
             <textarea id="pasteArea" class="paste-area" placeholder="Pega aquí tus celdas..."></textarea>
             <div style="margin-top: 5px; text-align: right;">
@@ -182,37 +154,144 @@
                 <input type="file" id="fileInput" accept=".csv,.txt" style="font-size: 0.9em;">
             </div>
         </div>
+        <p class="hint-text">💡 Si una de tus columnas Y ya trae el error/desviación estándar calculado (para modo Barras), nómbrala <strong>SD</strong>, <strong>Desv</strong>, <strong>Error</strong> o <strong>SEM</strong> en su encabezado — el programa la reconocerá automáticamente y no la promediará como réplica.</p>
+        <p class="hint-text">🎨 Debajo del nombre de cada columna Y puedes elegir su color, la forma de sus puntos y el estilo/grosor de su línea (aplica a la línea de tendencia o a la curva unida, según el modelo elegido). Todo se refleja también en la leyenda del gráfico.</p>
 
         <div class="data-table-wrapper">
             <table id="dataTable">
                 <thead>
                     <tr id="tableHeader">
                         <th><input type="text" id="headerX" value="X" class="cell-input" style="color:white; font-weight:bold;"></th>
-                        <th><input type="text" id="headerY1" value="Y1" class="cell-input" style="color:white; font-weight:bold;"></th>
+                        <th><input type="text" id="headerY1" value="Y1" class="cell-input col-name-input" style="color:white; font-weight:bold;">
+                        <div class="col-style-row">
+                            <input type="color" value="#e74c3c" class="col-color-input" title="Color de esta serie">
+                            <select class="col-shape-input col-mini-select" title="Forma del punto"><option value="circle" selected>● Círculo</option><option value="rect">■ Cuadrado</option><option value="rectRot">◆ Rombo</option><option value="triangle">▲ Triángulo</option><option value="star">★ Estrella</option><option value="cross">+ Cruz</option><option value="crossRot">✕ Diagonal</option></select>
+                            <select class="col-linestyle-input col-mini-select" title="Estilo de línea"><option value="solid">— Sólida</option><option value="dashed" selected>- - Discont.</option><option value="longdash">— — Larga</option><option value="dotted">···· Punteada</option><option value="dashdot">-·- Guión-p.</option></select>
+                            <select class="col-linewidth-input col-mini-select" title="Grosor de línea"><option value="1">1px</option><option value="2" selected>2px</option><option value="3">3px</option><option value="4">4px</option></select>
+                        </div></th>
                     </tr>
                 </thead>
-                <tbody id="tableBody">
-                    </tbody>
+                <tbody id="tableBody"></tbody>
             </table>
         </div>
     </div>
 
     <div class="section-box no-print">
         <h3>3. Configuración del Análisis</h3>
-        <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
-            <div>
-                <label>Modelo Matemático:</label>
-                <select id="modelSelect" style="padding: 5px; border-radius: 4px;">
-                    <option value="linear">Regresión Lineal (y = mx + b)</option>
-                    <option value="linearZero">Lineal (y = mx, Paso por 0)</option>
-                    <option value="michaelis">Michaelis-Menten</option>
+
+        <div class="subrow">
+            <div class="field-block">
+                <label>Tipo de Gráfico:</label>
+                <select id="chartTypeSelect" onchange="onChartTypeChange()">
+                    <option value="scatter">Dispersión / Curva (calibración, cromatograma...)</option>
+                    <option value="bars">Barras (datos individuales por categoría)</option>
                 </select>
             </div>
-            <div>
+
+            <div class="field-block" id="modelBlock">
+                <label>Modelo Matemático:</label>
+                <select id="modelSelect" onchange="onModelChange()">
+                    <option value="linear">Regresión Lineal (y = mx + b)</option>
+                    <option value="linearZero">Lineal (y = mx, Paso por 0)</option>
+                    <option value="poly2">Polinómica (grado 2)</option>
+                    <option value="poly3">Polinómica (grado 3)</option>
+                    <option value="michaelis">Michaelis-Menten</option>
+                    <option value="none">Sin regresión (solo curva de datos)</option>
+                </select>
+            </div>
+
+            <div class="field-block" id="joinBlock" style="display:none;">
+                <label>Unión de puntos:</label>
+                <select id="joinSelect">
+                    <option value="none">Solo puntos (sin unir)</option>
+                    <option value="straight">Líneas rectas</option>
+                    <option value="monotone" selected>Curva suave (monótona, recomendada)</option>
+                    <option value="classic">Curva suave (spline clásico)</option>
+                </select>
+            </div>
+
+            <div class="field-block" id="orientationBlock" style="display:none;">
+                <label>Orientación de barras:</label>
+                <select id="orientationSelect">
+                    <option value="vertical">Vertical</option>
+                    <option value="horizontal">Horizontal</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="subrow">
+            <div class="field-block">
                 <label><input type="checkbox" id="chkStats" checked> <strong>Calcular Promedios (Estadística)</strong></label>
             </div>
+            <div class="field-block">
+                <label for="avgSeriesColor" style="font-size:0.8em;">Estilo del promedio:</label>
+                <div class="col-style-row" style="margin-top:0;">
+                    <input type="color" id="avgSeriesColor" value="#000000" title="Color del promedio">
+                    <select id="avgSeriesShape" class="col-mini-select" title="Forma del punto"><option value="rectRot" selected>◆ Rombo</option><option value="circle">● Círculo</option><option value="rect">■ Cuadrado</option><option value="triangle">▲ Triángulo</option><option value="star">★ Estrella</option><option value="cross">+ Cruz</option><option value="crossRot">✕ Diagonal</option></select>
+                    <select id="avgLineStyle" class="col-mini-select" title="Estilo de línea"><option value="solid">— Sólida</option><option value="dashed" selected>- - Discont.</option><option value="longdash">— — Larga</option><option value="dotted">···· Punteada</option><option value="dashdot">-·- Guión-p.</option></select>
+                    <select id="avgLineWidth" class="col-mini-select" title="Grosor de línea"><option value="1">1px</option><option value="2" selected>2px</option><option value="3">3px</option><option value="4">4px</option></select>
+                </div>
+            </div>
+            <div class="field-block" id="ciBlock">
+                <label><input type="checkbox" id="chkConfidenceBand"> <strong>Banda de confianza 95%</strong></label>
+            </div>
+            <div class="field-block">
+                <label><input type="checkbox" id="chkResiduals"> <strong>Gráfico de residuales / outliers</strong></label>
+            </div>
+        </div>
+
+        <div style="margin-top:20px;">
             <button class="success" onclick="runAnalysis()" style="padding: 10px 40px; font-size: 1.1em;">🚀 EJECUTAR ANÁLISIS</button>
         </div>
+    </div>
+
+    <div class="section-box no-print">
+        <h3>4. Líneas de Referencia <span style="font-weight:normal; font-size:0.7em; color:#7f8c8d;">(opcional — marcar zonas o umbrales, ej. límites de detección en cromatografía)</span></h3>
+        <div class="subrow">
+            <div class="field-block">
+                <label>Tipo:</label>
+                <select id="refLineType"><option value="vertical">Vertical (en X)</option><option value="horizontal">Horizontal (en Y)</option></select>
+            </div>
+            <div class="field-block">
+                <label>Valor:</label>
+                <input type="text" id="refLineValue" placeholder="ej. 2.5" style="width:100px;">
+            </div>
+            <div class="field-block">
+                <label>Etiqueta:</label>
+                <input type="text" id="refLineLabel" placeholder="ej. LOD" style="width:120px;">
+            </div>
+            <div class="field-block">
+                <label>Color:</label>
+                <input type="color" id="refLineColor" value="#e74c3c" style="width:50px; height:34px; padding:0; cursor:pointer;">
+            </div>
+            <div class="field-block">
+                <button onclick="addReferenceLine()">➕ Añadir línea</button>
+            </div>
+        </div>
+        <ul class="ref-line-list" id="refLineList"></ul>
+        <p class="plugin-status" id="annotationStatus"></p>
+    </div>
+
+    <div class="section-box no-print">
+        <h3>5. Interpolación de Muestras</h3>
+        <p class="hint-text">Ejecuta primero el análisis (paso 3). Pega uno o varios valores (uno por línea) para leerlos sobre la curva/regresión actual. Si tienes varias columnas Y sin promediar, la interpolación usa la primera serie/ajuste. No disponible en modo Barras.</p>
+        <div class="subrow">
+            <div class="field-block">
+                <label>Dirección:</label>
+                <select id="interpDirection">
+                    <option value="y2x">Y → X (conozco la señal/absorbancia, quiero el valor en X)</option>
+                    <option value="x2y">X → Y (conozco el valor en X, quiero la señal/absorbancia)</option>
+                </select>
+            </div>
+            <div class="field-block" style="flex:1; min-width:220px;">
+                <label>Valor(es) a interpolar (uno por línea):</label>
+                <textarea id="interpValues" class="paste-area" style="height:50px;" placeholder="0.452&#10;0.813&#10;1.204"></textarea>
+            </div>
+            <div class="field-block">
+                <button class="success" onclick="runInterpolation()">🎯 Calcular Interpolación</button>
+            </div>
+        </div>
+        <div id="interpolationResultsContainer"></div>
     </div>
 
     <div id="reportSection" style="display: none;">
@@ -221,18 +300,22 @@
             <span id="reportDate" style="color:#777;"></span>
         </div>
 
+        <div class="toolbar-zoom no-print" id="zoomToolbar">
+            <span>🔍 Rueda del mouse: zoom · Arrastrar: zoom por caja · Shift+Arrastrar: desplazar</span>
+            <button class="secondary small" onclick="resetZoom()">↺ Restablecer Zoom</button>
+        </div>
+
         <div class="chart-container">
             <canvas id="mainChart"></canvas>
         </div>
 
         <div class="no-print" style="text-align: center; margin-bottom: 20px;">
             <button onclick="downloadImage()">🖼️ Descargar Imagen</button>
-            <button onclick="exportCSV()">📄 Descargar CSV</button>
+            <button onclick="exportCSV()">📄 Descargar CSV (Datos + Resultados)</button>
             <button class="secondary" onclick="window.print()">🖨️ Imprimir Reporte PDF</button>
         </div>
 
         <div id="numericResults" class="results-grid"></div>
-        
         <div id="recommendationsContainer"></div>
 
         <div id="statsTableContainer" style="margin-top: 30px; display: none;">
@@ -242,455 +325,1378 @@
             </div>
         </div>
 
+        <div id="residualsSection" style="margin-top: 30px; display: none;">
+            <h3>Gráfico de Residuales</h3>
+            <div class="chart-container small">
+                <canvas id="residualsChart"></canvas>
+            </div>
+            <div id="outlierList"></div>
+        </div>
+
         <div class="formula-box" id="formulaBox">
             <h3>📚 Fórmulas Utilizadas</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
                 <div>
                     <h4 style="color:#3498db;">Estadística Descriptiva</h4>
-                    <div class="formula-item">
-                        <strong>Promedio ($\bar{x}$):</strong>
-                        $$ \bar{x} = \frac{\sum_{i=1}^{n} x_i}{n} $$
-                    </div>
-                    <div class="formula-item">
-                        <strong>Desviación Estándar ($s$):</strong>
-                        $$ s = \sqrt{\frac{\sum (x_i - \bar{x})^2}{n-1}} $$
-                    </div>
-                    <div class="formula-item">
-                        <strong>Coeficiente de Variación ($CV$):</strong>
-                        $$ CV_{\%} = \left( \frac{s}{|\bar{x}|} \right) \times 100 $$
-                    </div>
+                    <div class="formula-item"><strong>Promedio ($\bar{x}$):</strong> $$ \bar{x} = \frac{\sum_{i=1}^{n} x_i}{n} $$</div>
+                    <div class="formula-item"><strong>Desviación Estándar ($s$):</strong> $$ s = \sqrt{\frac{\sum (x_i - \bar{x})^2}{n-1}} $$</div>
+                    <div class="formula-item"><strong>Coeficiente de Variación ($CV$):</strong> $$ CV_{\%} = \left( \frac{s}{|\bar{x}|} \right) \times 100 $$</div>
                 </div>
                 <div>
-                    <h4 style="color:#e74c3c;">Regresión Lineal</h4>
-                    <div id="regressionFormulas">
-                        </div>
+                    <h4 style="color:#e74c3c;">Regresión</h4>
+                    <div id="regressionFormulas"></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 <script>
-    let myChart = null;
-    let colCount = 1;
-    const colors = ['#e74c3c', '#3498db', '#9b59b6', '#f1c40f', '#2ecc71', '#e67e22', '#1abc9c'];
+// ============================================================================
+// Analizador de Datos Experimentales - Prof. José Miguel Villarreal
+// Revisión 2026-09-10: modo curva suavizada (cromatografía), barras con error,
+// regresión polinómica + bandas de confianza, residuales/outliers, líneas de
+// referencia, zoom/pan e interpolación de muestras en ambas direcciones.
+// ============================================================================
 
-    // --- INICIALIZACIÓN ---
-    window.onload = function() {
-        for(let i=0; i<4; i++) addRow();
-    };
+// ===== ESTADO GLOBAL =====
+let myChart = null;
+let residualsChart = null;
+let colCount = 1;
+let currentAnalysisData = [];
+let currentRegressionResults = [];
+let referenceLines = [];           // [{id, type:'vertical'|'horizontal', value, label, color}]
+let interpolationResults = [];     // [{input, direction, output, note, x, y}]
+let zoomAvailable = false;
+let annotationAvailable = false;
+let lastAnalysisContext = null;    // guarda el fit / datos activos para poder interpolar después
+const colors = ['#e74c3c', '#3498db', '#9b59b6', '#f1c40f', '#2ecc71', '#e67e22', '#1abc9c'];
 
-    // --- RECONOCIMIENTO NUMÉRICO AVANZADO ---
-    // Esta función es la clave para leer 1,2 o 1.2 o 1E-2 por igual
-    function parseSmartNumber(val) {
-        if (!val) return NaN;
-        // 1. Convertir a string
-        let str = val.toString().trim();
-        // 2. Reemplazar coma por punto SI no es un CSV que ya se separó, 
-        //    sino un valor de celda individual (ej: "1,5").
-        //    Ojo: Si escriben 1,000 (mil) podría fallar, asumimos formato decimal latino
-        str = str.replace(',', '.');
-        // 3. Parsear
-        return parseFloat(str);
+window.onload = function () {
+    for (let i = 0; i < 4; i++) addRow();
+    checkPluginAvailability();
+    onChartTypeChange();
+    onModelChange();
+};
+
+// Comprueba si los plugins opcionales de Chart.js (zoom, anotaciones) cargaron
+// correctamente desde el CDN. Si no, el programa sigue funcionando sin ellos.
+function checkPluginAvailability() {
+    try {
+        annotationAvailable = !!(window.Chart && Chart.registry && Chart.registry.plugins.get('annotation'));
+    } catch (e) { annotationAvailable = false; }
+    try {
+        zoomAvailable = !!(window.Chart && Chart.registry && Chart.registry.plugins.get('zoom'));
+    } catch (e) { zoomAvailable = false; }
+
+    const annStatus = document.getElementById('annotationStatus');
+    if (annStatus) {
+        annStatus.textContent = annotationAvailable
+            ? ''
+            : '⚠️ El módulo de líneas de referencia no pudo cargarse (sin conexión al CDN). El resto del programa funciona con normalidad.';
     }
+    const zoomToolbar = document.getElementById('zoomToolbar');
+    if (zoomToolbar && !zoomAvailable) {
+        zoomToolbar.innerHTML = '<span style="color:#95a5a6;">🔍 Zoom/pan no disponible sin conexión al CDN (el resto del gráfico funciona con normalidad).</span>';
+    }
+}
 
-    // --- GESTIÓN DE TABLA Y DATOS ---
-    function processPaste() {
-        const text = document.getElementById('pasteArea').value.trim();
-        if(!text) return;
+// ===================== ENTRADA DE DATOS (sin cambios de fondo) =====================
 
-        // Detectar delimitador
-        const delim = text.includes('\t') ? '\t' : (text.includes(';') ? ';' : ',');
-        
-        Papa.parse(text, {
-            delimiter: delim,
+function parseSmartNumber(val) {
+    if (!val) return NaN;
+    let str = val.toString().trim().replace(',', '.');
+    return parseFloat(str);
+}
+
+// Genera el HTML de los controles de estilo (color, forma de punto, tipo y grosor de línea)
+// que acompañan a cada encabezado de columna Y. Se reutiliza en rebuildTable/addYColumn/clearData.
+function columnStyleControlsHTML(defColor) {
+    return `<div class="col-style-row">
+        <input type="color" value="${defColor}" class="col-color-input" title="Color de esta serie">
+        <select class="col-shape-input col-mini-select" title="Forma del punto"><option value="circle" selected>● Círculo</option><option value="rect">■ Cuadrado</option><option value="rectRot">◆ Rombo</option><option value="triangle">▲ Triángulo</option><option value="star">★ Estrella</option><option value="cross">+ Cruz</option><option value="crossRot">✕ Diagonal</option></select>
+        <select class="col-linestyle-input col-mini-select" title="Estilo de línea"><option value="solid">— Sólida</option><option value="dashed" selected>- - Discont.</option><option value="longdash">— — Larga</option><option value="dotted">···· Punteada</option><option value="dashdot">-·- Guión-p.</option></select>
+        <select class="col-linewidth-input col-mini-select" title="Grosor de línea"><option value="1">1px</option><option value="2" selected>2px</option><option value="3">3px</option><option value="4">4px</option></select>
+    </div>`;
+}
+
+function processPaste() {
+    const text = document.getElementById('pasteArea').value.trim();
+    if (!text) return;
+    const delim = text.includes('\t') ? '\t' : (text.includes(';') ? ';' : ',');
+
+    Papa.parse(text, {
+        delimiter: delim, skipEmptyLines: true,
+        complete: function (results) { rebuildTable(results.data, document.getElementById('hasHeadersPaste').checked); }
+    });
+}
+
+document.getElementById('fileInput').addEventListener('change', function (e) {
+    if (e.target.files[0]) {
+        Papa.parse(e.target.files[0], {
             skipEmptyLines: true,
-            complete: function(results) {
-                // Pasamos raw string data a rebuildTable para que use parseSmartNumber
-                rebuildTable(results.data, document.getElementById('hasHeadersPaste').checked);
-            }
+            complete: function (res) { rebuildTable(res.data, true); }
         });
     }
-    
-    document.getElementById('fileInput').addEventListener('change', function(e) {
-        if(e.target.files[0]) {
-            Papa.parse(e.target.files[0], {
-                skipEmptyLines: true,
-                complete: function(res) { rebuildTable(res.data, true); }
-            });
+});
+
+// VERSIÓN CORREGIDA: Filtra columnas estadísticas y bloques de texto para evitar errores cíclicos
+function rebuildTable(matrix, hasHeader) {
+    if (matrix.length < 1) return;
+
+    let validCols = [0];
+    let headers = [];
+
+    if (hasHeader) {
+        for (let i = 1; i < matrix[0].length; i++) {
+            let colName = matrix[0][i] ? matrix[0][i].toString().trim() : "";
+            // IGNORAMOS LAS COLUMNAS CREADAS POR EL EXPORTADOR
+            if (!["Promedio", "Desv. Std", "CV (%)"].includes(colName)) {
+                validCols.push(i);
+                headers.push(colName);
+            }
+        }
+    } else {
+        for (let i = 1; i < matrix[0].length; i++) {
+            validCols.push(i);
+            headers.push(`Y${i}`);
+        }
+    }
+
+    const numCols = validCols.length;
+    if (numCols < 2) return alert("Se necesitan al menos 2 columnas (X, Y) válidas.");
+
+    const headerRow = document.getElementById('tableHeader');
+    while (headerRow.children.length > 1) headerRow.removeChild(headerRow.lastChild);
+
+    colCount = numCols - 1;
+    for (let i = 0; i < colCount; i++) {
+        let th = document.createElement('th');
+        let val = hasHeader ? headers[i] : `Y${i + 1}`;
+        let defColor = colors[i % colors.length];
+        th.innerHTML = `<input type="text" value="${val}" class="cell-input col-name-input" style="color:white; font-weight:bold;">` + columnStyleControlsHTML(defColor);
+        headerRow.appendChild(th);
+    }
+    if (hasHeader) document.getElementById('headerX').value = matrix[0][0];
+
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    let start = hasHeader ? 1 : 0;
+
+    for (let i = start; i < matrix.length; i++) {
+        let rowData = matrix[i];
+
+        // Freno de seguridad: Ignorar el bloque de resultados del exportador CSV
+        if (rowData[0] && rowData[0].toString().includes("---")) break;
+        if (rowData.length < 2 || (rowData[0] === "" && rowData[1] === "")) continue;
+
+        let tr = document.createElement('tr');
+        let xVal = rowData[validCols[0]] !== undefined ? rowData[validCols[0]] : '';
+        let html = `<td><input type="text" class="cell-input x-val" value="${xVal}"></td>`;
+        for (let j = 0; j < colCount; j++) {
+            let val = rowData[validCols[j + 1]];
+            html += `<td><input type="text" class="cell-input y-val" data-col="${j}" value="${val !== undefined ? val : ''}"></td>`;
+        }
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+    }
+}
+
+function addRow() {
+    const tr = document.createElement('tr');
+    let html = `<td><input type="text" class="cell-input x-val"></td>`;
+    for (let i = 0; i < colCount; i++) html += `<td><input type="text" class="cell-input y-val" data-col="${i}"></td>`;
+    tr.innerHTML = html;
+    document.getElementById('tableBody').appendChild(tr);
+}
+
+function addYColumn() {
+    colCount++;
+    let th = document.createElement('th');
+    let defColor = colors[(colCount - 1) % colors.length];
+    th.innerHTML = `<input type="text" value="Y${colCount}" class="cell-input col-name-input" style="color:white; font-weight:bold;">` + columnStyleControlsHTML(defColor);
+    document.getElementById('tableHeader').appendChild(th);
+    document.querySelectorAll('#tableBody tr').forEach(tr => {
+        let td = document.createElement('td');
+        td.innerHTML = `<input type="text" class="cell-input y-val" data-col="${colCount - 1}">`;
+        tr.appendChild(td);
+    });
+}
+
+function clearData() {
+    document.getElementById('pasteArea').value = '';
+    document.getElementById('tableBody').innerHTML = '';
+    colCount = 1; currentAnalysisData = []; currentRegressionResults = [];
+    interpolationResults = []; lastAnalysisContext = null; referenceLines = [];
+    // Reconstruimos el encabezado completo desde cero (no confiar en ids que "processPaste"
+    // pudo haber reemplazado — este era un bug latente del archivo original).
+    const h = document.getElementById('tableHeader');
+    h.innerHTML = '<th><input type="text" id="headerX" value="X" class="cell-input" style="color:white; font-weight:bold;"></th>' +
+                  '<th><input type="text" id="headerY1" value="Y1" class="cell-input col-name-input" style="color:white; font-weight:bold;">' + columnStyleControlsHTML('#e74c3c') + '</th>';
+    document.getElementById('refLineList').innerHTML = '';
+    document.getElementById('reportSection').style.display = 'none';
+    document.getElementById('interpolationResultsContainer').innerHTML = '';
+    for (let i = 0; i < 4; i++) addRow();
+}
+
+// ===================== UI: mostrar/ocultar controles según selección =====================
+
+function onChartTypeChange() {
+    const type = document.getElementById('chartTypeSelect').value;
+    document.getElementById('modelBlock').style.display = (type === 'scatter') ? '' : 'none';
+    document.getElementById('orientationBlock').style.display = (type === 'bars') ? '' : 'none';
+    onModelChange();
+}
+
+function onModelChange() {
+    const type = document.getElementById('chartTypeSelect').value;
+    const model = document.getElementById('modelSelect').value;
+    document.getElementById('joinBlock').style.display = (type === 'scatter' && model === 'none') ? '' : 'none';
+    const ciApplicable = ['linear', 'linearZero', 'poly2', 'poly3'].includes(model) && type === 'scatter';
+    const ciCheckbox = document.getElementById('chkConfidenceBand');
+    ciCheckbox.disabled = !ciApplicable;
+    if (!ciApplicable) ciCheckbox.checked = false;
+}
+
+// ===================== NÚCLEO MATEMÁTICO (probado en Node antes de integrar) =====================
+
+function solveLinearSystem(A, b) {
+    const n = A.length;
+    const M = A.map((row, i) => [...row, b[i]]);
+    for (let col = 0; col < n; col++) {
+        let pivot = col;
+        for (let r = col + 1; r < n; r++) if (Math.abs(M[r][col]) > Math.abs(M[pivot][col])) pivot = r;
+        [M[col], M[pivot]] = [M[pivot], M[col]];
+        if (Math.abs(M[col][col]) < 1e-12) throw new Error("Sistema singular (datos insuficientes o colineales)");
+        for (let r = 0; r < n; r++) {
+            if (r === col) continue;
+            const factor = M[r][col] / M[col][col];
+            for (let c = col; c <= n; c++) M[r][c] -= factor * M[col][c];
+        }
+    }
+    return M.map((row, i) => row[n] / row[i]);
+}
+
+function invertMatrix(A) {
+    const n = A.length;
+    const I = A.map((row, i) => row.map((_, j) => (i === j ? 1 : 0)));
+    const M = A.map((row, i) => [...row, ...I[i]]);
+    for (let col = 0; col < n; col++) {
+        let pivot = col;
+        for (let r = col + 1; r < n; r++) if (Math.abs(M[r][col]) > Math.abs(M[pivot][col])) pivot = r;
+        [M[col], M[pivot]] = [M[pivot], M[col]];
+        if (Math.abs(M[col][col]) < 1e-12) throw new Error("Matriz singular");
+        const piv = M[col][col];
+        for (let c = 0; c < 2 * n; c++) M[col][c] /= piv;
+        for (let r = 0; r < n; r++) {
+            if (r === col) continue;
+            const factor = M[r][col];
+            for (let c = 0; c < 2 * n; c++) M[r][c] -= factor * M[col][c];
+        }
+    }
+    return M.map(row => row.slice(n));
+}
+
+function binom(n, k) {
+    if (k < 0 || k > n) return 0;
+    let res = 1;
+    for (let i = 0; i < k; i++) res = res * (n - i) / (i + 1);
+    return res;
+}
+
+// Regresión polinómica generalizada (grado 1/2/3), con intercepto opcionalmente forzado a 0.
+// Ajusta en base centrada (x - xMean) por estabilidad numérica y expande a coeficientes naturales.
+function polynomialRegression(data, degree, forceZero) {
+    const n = data.length;
+    const p = forceZero ? degree : degree + 1;
+    if (n <= p) throw new Error("Se requieren más puntos que parámetros del modelo (mínimo " + (p + 1) + ").");
+
+    const xMean = forceZero ? 0 : data.reduce((a, d) => a + d.x, 0) / n;
+    const cols = [];
+    for (let k = forceZero ? 1 : 0; k <= degree; k++) cols.push(k);
+
+    const X = data.map(d => cols.map(k => Math.pow(d.x - xMean, k)));
+    const y = data.map(d => d.y);
+
+    const XtX = cols.map((_, i) => cols.map((_, j) => X.reduce((s, row) => s + row[i] * row[j], 0)));
+    const Xty = cols.map((_, i) => X.reduce((s, row, idx) => s + row[i] * y[idx], 0));
+    const betaCentered = solveLinearSystem(XtX, Xty);
+    const XtXinv = invertMatrix(XtX);
+
+    const aNatural = new Array(degree + 1).fill(0);
+    cols.forEach((k, idx) => {
+        const bk = betaCentered[idx];
+        for (let j = 0; j <= k; j++) aNatural[j] += bk * binom(k, j) * Math.pow(-xMean, k - j);
+    });
+
+    const yMean = y.reduce((a, b) => a + b, 0) / n;
+    let ssRes = 0, ssTot = 0;
+    const evalCentered = (xv) => cols.reduce((s, k, idx) => s + betaCentered[idx] * Math.pow(xv - xMean, k), 0);
+    data.forEach(d => {
+        const yhat = evalCentered(d.x);
+        ssRes += Math.pow(d.y - yhat, 2);
+        ssTot += Math.pow(d.y - yMean, 2);
+    });
+    const r2 = ssTot === 0 ? 0 : 1 - ssRes / ssTot;
+    const df = n - p;
+    const s2 = df > 0 ? ssRes / df : 0;
+    const s = Math.sqrt(s2);
+
+    return {
+        type: 'poly', degree, forceZero, coeffs: aNatural, r2, s, s2, df, n, p, ssRes,
+        xMean, cols, XtXinv,
+        evalAt: (xv) => cols.reduce((sum, k, idx) => sum + betaCentered[idx] * Math.pow(xv - xMean, k), 0),
+        varAt: (xv) => {
+            const x0vec = cols.map(k => Math.pow(xv - xMean, k));
+            let v = 0;
+            for (let i = 0; i < cols.length; i++)
+                for (let j = 0; j < cols.length; j++)
+                    v += x0vec[i] * XtXinv[i][j] * x0vec[j];
+            return s2 * v;
+        }
+    };
+}
+
+// --- Distribución t de Student (para bandas de confianza) ---
+function logGamma(x) {
+    const cof = [676.5203681218851, -1259.1392167224028, 771.32342877765313,
+        -176.61502916214059, 12.507343278686905, -0.13857109526572012,
+        9.9843695780195716e-6, 1.5056327351493116e-7];
+    if (x < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * x)) - logGamma(1 - x);
+    x -= 1;
+    let a = 0.99999999999980993;
+    const t = x + 7.5;
+    for (let i = 0; i < cof.length; i++) a += cof[i] / (x + i + 1);
+    return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+
+function betacf(x, a, b) {
+    const MAXIT = 200, EPS = 3e-9, FPMIN = 1e-30;
+    let qab = a + b, qap = a + 1, qam = a - 1;
+    let c = 1, d = 1 - qab * x / qap;
+    if (Math.abs(d) < FPMIN) d = FPMIN;
+    d = 1 / d;
+    let h = d;
+    for (let m = 1; m <= MAXIT; m++) {
+        const m2 = 2 * m;
+        let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+        d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+        c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+        d = 1 / d; h *= d * c;
+        aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+        d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+        c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+        d = 1 / d;
+        const del = d * c; h *= del;
+        if (Math.abs(del - 1) < EPS) break;
+    }
+    return h;
+}
+
+function regularizedIncompleteBeta(x, a, b) {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    const bt = Math.exp(logGamma(a + b) - logGamma(a) - logGamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+    if (x < (a + 1) / (a + b + 2)) return bt * betacf(x, a, b) / a;
+    else return 1 - bt * betacf(1 - x, b, a) / b;
+}
+
+function tCDFtwoTail(t, df) {
+    if (t <= 0) return 0;
+    const x = df / (df + t * t);
+    return 1 - regularizedIncompleteBeta(x, df / 2, 0.5);
+}
+
+function tCritical(confLevel, df) {
+    if (df < 1) return NaN;
+    let lo = 0, hi = 1000;
+    for (let i = 0; i < 100; i++) {
+        const mid = (lo + hi) / 2;
+        const p = tCDFtwoTail(mid, df);
+        if (p > confLevel) hi = mid; else lo = mid;
+    }
+    return (lo + hi) / 2;
+}
+
+// --- Interpolación cúbica monótona (Fritsch-Carlson): sin oscilaciones/picos falsos ---
+function buildMonotoneTangents(pts) {
+    const n = pts.length;
+    const dx = new Array(n - 1), slope = new Array(n - 1);
+    for (let i = 0; i < n - 1; i++) {
+        dx[i] = pts[i + 1].x - pts[i].x;
+        slope[i] = dx[i] === 0 ? 0 : (pts[i + 1].y - pts[i].y) / dx[i];
+    }
+    const m = new Array(n);
+    m[0] = slope[0]; m[n - 1] = slope[n - 2];
+    for (let i = 1; i < n - 1; i++) {
+        if (slope[i - 1] * slope[i] <= 0) m[i] = 0;
+        else m[i] = (slope[i - 1] + slope[i]) / 2;
+    }
+    for (let i = 0; i < n - 1; i++) {
+        if (slope[i] === 0) { m[i] = 0; m[i + 1] = 0; continue; }
+        const a = m[i] / slope[i], b = m[i + 1] / slope[i];
+        const h = Math.hypot(a, b);
+        if (h > 3) {
+            const t = 3 / h;
+            m[i] = t * a * slope[i];
+            m[i + 1] = t * b * slope[i];
+        }
+    }
+    return m;
+}
+
+function hermiteEval(p0, p1, m0, m1, x) {
+    const h = p1.x - p0.x;
+    const t = (x - p0.x) / h;
+    const t2 = t * t, t3 = t2 * t;
+    const h00 = 2 * t3 - 3 * t2 + 1, h10 = t3 - 2 * t2 + t, h01 = -2 * t3 + 3 * t2, h11 = t3 - t2;
+    return h00 * p0.y + h10 * h * m0 + h01 * p1.y + h11 * h * m1;
+}
+
+// pts DEBE estar ordenado por x. mode: 'straight' | 'monotone' | 'classic'
+// 'classic' se usa solo para el renderizado visual (Chart.js lo maneja con tension);
+// para cálculos numéricos de interpolación tratamos 'classic' igual que 'monotone'
+// evitando así reproducir manualmente el spline Catmull-Rom (con riesgo de overshoot).
+function interpolateY(pts, xQuery, mode) {
+    const n = pts.length;
+    if (n === 0) return null;
+    if (n === 1) return pts[0].y;
+    if (xQuery < pts[0].x || xQuery > pts[n - 1].x) return null; // fuera de rango, no extrapolamos
+    for (let i = 0; i < n - 1; i++) {
+        if (xQuery >= pts[i].x && xQuery <= pts[i + 1].x) {
+            if (mode === 'straight') {
+                const t = (pts[i + 1].x === pts[i].x) ? 0 : (xQuery - pts[i].x) / (pts[i + 1].x - pts[i].x);
+                return pts[i].y + t * (pts[i + 1].y - pts[i].y);
+            } else {
+                const m = buildMonotoneTangents(pts);
+                return hermiteEval(pts[i], pts[i + 1], m[i], m[i + 1], xQuery);
+            }
+        }
+    }
+    return null;
+}
+
+// Busca TODAS las raíces de f(x) = target en [xMin, xMax] (muestreo + bisección por tramo)
+function findAllRoots(f, xMin, xMax, target, numSamples) {
+    numSamples = numSamples || 500;
+    const roots = [];
+    const step = (xMax - xMin) / numSamples;
+    let xPrev = xMin, yPrev = f(xPrev) - target;
+    for (let i = 1; i <= numSamples; i++) {
+        const xCur = xMin + i * step;
+        const yCur = f(xCur) - target;
+        if (Number.isFinite(yPrev) && yPrev === 0) roots.push(xPrev);
+        else if (Number.isFinite(yPrev) && Number.isFinite(yCur) && yPrev * yCur < 0) {
+            let lo = xPrev, hi = xCur, flo = yPrev;
+            for (let it = 0; it < 60; it++) {
+                const mid = (lo + hi) / 2, fmid = f(mid) - target;
+                if (fmid === 0) { lo = hi = mid; break; }
+                if (flo * fmid < 0) hi = mid; else { lo = mid; flo = fmid; }
+            }
+            roots.push((lo + hi) / 2);
+        }
+        xPrev = xCur; yPrev = yCur;
+    }
+    return roots;
+}
+// ===================== PLUGIN PROPIO DE BARRAS DE ERROR (whiskers con capuchones) =====================
+// Reemplaza el truco anterior (linea + pointStyle 'dash'); dibuja directamente en el canvas,
+// funciona igual para modo dispersión (vertical, alrededor de Y) y modo barras (según orientación).
+// Resalta los ejes cartesianos (X=0 vertical, Y=0 horizontal) cuando el rango graficado
+// cruza por cero — imprescindible para leer gráficos con cuadrantes negativos, por ejemplo
+// la intersección con el eje X en un doble recíproco de Lineweaver-Burk (cuadrante II/IV).
+// mode: 'auto' (solo si hay valores negativos) | 'always' | 'never'
+const cartesianAxisPlugin = {
+    id: 'cartesianAxisPluginCustom',
+    afterDraw(chart) {
+        const cfg = (chart.options.plugins && chart.options.plugins.cartesianAxis) || {};
+        const mode = cfg.mode || 'auto';
+        if (mode === 'never') return;
+        const xScale = chart.scales.x, yScale = chart.scales.y;
+        if (!xScale || !yScale || xScale.type === 'logarithmic' || yScale.type === 'logarithmic' || xScale.type === 'category') return;
+
+        const crossesZeroX = xScale.min < 0 && xScale.max > 0; // el eje Y (vertical, en x=0) hace falta
+        const crossesZeroY = yScale.min < 0 && yScale.max > 0; // el eje X (horizontal, en y=0) hace falta
+        const showVertical = mode === 'always' || crossesZeroX;
+        const showHorizontal = mode === 'always' || crossesZeroY;
+        if (!showVertical && !showHorizontal) return;
+
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 1.6;
+        if (showHorizontal) {
+            const yPix = yScale.getPixelForValue(0);
+            ctx.beginPath(); ctx.moveTo(xScale.left, yPix); ctx.lineTo(xScale.right, yPix); ctx.stroke();
+        }
+        if (showVertical) {
+            const xPix = xScale.getPixelForValue(0);
+            ctx.beginPath(); ctx.moveTo(xPix, yScale.top); ctx.lineTo(xPix, yScale.bottom); ctx.stroke();
+        }
+        ctx.restore();
+    }
+};
+
+const errorBarPlugin = {
+    id: 'errorBarPluginCustom',
+    afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        const isBar = chart.config.type === 'bar';
+        const capHalf = 6;
+
+        function line(x1, y1, x2, y2) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+
+        chart.data.datasets.forEach((ds, dsIndex) => {
+            const meta = chart.getDatasetMeta(dsIndex);
+            if (!meta || meta.hidden) return;
+            ctx.save();
+            ctx.strokeStyle = ds._errorColor || '#2c3e50';
+            ctx.lineWidth = 1.5;
+
+            if (isBar && ds._errorBar) {
+                const indexAxis = chart.options.indexAxis || 'x';
+                const valueScale = indexAxis === 'y' ? chart.scales.x : chart.scales.y;
+                meta.data.forEach((bar, i) => {
+                    const err = ds._errorBar[i];
+                    const val = ds.data[i];
+                    if (err == null || isNaN(err) || err === 0 || val == null || !bar) return;
+                    if (indexAxis === 'y') {
+                        const yPix = bar.y;
+                        const xLo = valueScale.getPixelForValue(val - err);
+                        const xHi = valueScale.getPixelForValue(val + err);
+                        line(xLo, yPix, xHi, yPix);
+                        line(xLo, yPix - capHalf, xLo, yPix + capHalf);
+                        line(xHi, yPix - capHalf, xHi, yPix + capHalf);
+                    } else {
+                        const xPix = bar.x;
+                        const yLo = valueScale.getPixelForValue(val - err);
+                        const yHi = valueScale.getPixelForValue(val + err);
+                        line(xPix, yLo, xPix, yHi);
+                        line(xPix - capHalf, yLo, xPix + capHalf, yLo);
+                        line(xPix - capHalf, yHi, xPix + capHalf, yHi);
+                    }
+                });
+            } else if (!isBar && ds._errorData) {
+                const xScale = chart.scales.x, yScale = chart.scales.y;
+                ds._errorData.forEach(pt => {
+                    if (pt.err == null || isNaN(pt.err) || pt.err === 0) return;
+                    const xPix = xScale.getPixelForValue(pt.x);
+                    const yTop = yScale.getPixelForValue(pt.y + pt.err);
+                    const yBot = yScale.getPixelForValue(pt.y - pt.err);
+                    line(xPix, yTop, xPix, yBot);
+                    line(xPix - capHalf, yTop, xPix + capHalf, yTop);
+                    line(xPix - capHalf, yBot, xPix + capHalf, yBot);
+                });
+            }
+            ctx.restore();
+        });
+    }
+};
+
+function formatNum(v) {
+    if (v === null || v === undefined || isNaN(v)) return '';
+    if (Math.abs(v) < 0.0001 && v !== 0) return v.toExponential(3);
+    return Number(v.toFixed(5)).toString();
+}
+
+function hexToRgba(hex, alpha) {
+    if (hex === 'black') hex = '#000000';
+    const h = hex.replace('#', '');
+    const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+    const bigint = parseInt(full, 16);
+    const r = (bigint >> 16) & 255, g = (bigint >> 8) & 255, b = bigint & 255;
+    return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function getYHeaders() {
+    return Array.from(document.querySelectorAll('#tableHeader th .col-name-input')).map(inp => inp.value);
+}
+
+function getColumnColors() {
+    return Array.from(document.querySelectorAll('#tableHeader th .col-color-input')).map(inp => inp.value);
+}
+
+function getLineDashArray(styleKey) {
+    switch (styleKey) {
+        case 'solid': return [];
+        case 'longdash': return [10, 5];
+        case 'dotted': return [1, 3];
+        case 'dashdot': return [8, 4, 2, 4];
+        case 'dashed': default: return [5, 5];
+    }
+}
+
+// Estilo completo (color, forma de punto, tipo y grosor de línea) por cada columna Y,
+// leído directamente de los controles del encabezado de la tabla.
+function getColumnStyles() {
+    const colorInputs = document.querySelectorAll('#tableHeader th .col-color-input');
+    const shapeInputs = document.querySelectorAll('#tableHeader th .col-shape-input');
+    const lineStyleInputs = document.querySelectorAll('#tableHeader th .col-linestyle-input');
+    const lineWidthInputs = document.querySelectorAll('#tableHeader th .col-linewidth-input');
+    const n = colorInputs.length;
+    const arr = [];
+    for (let i = 0; i < n; i++) {
+        arr.push({
+            color: colorInputs[i] ? colorInputs[i].value : colors[i % colors.length],
+            shape: shapeInputs[i] ? shapeInputs[i].value : 'circle',
+            dash: getLineDashArray(lineStyleInputs[i] ? lineStyleInputs[i].value : 'dashed'),
+            width: lineWidthInputs[i] ? parseInt(lineWidthInputs[i].value, 10) : 2
+        });
+    }
+    return arr;
+}
+
+// Reconoce una columna Y ya destinada a error/SD por su encabezado (SD, Desv, Error, SEM...)
+function findErrorColIndex(headers) {
+    const errNames = new Set(['sd', 'std', 'desv', 'desvstd', 'desvest', 'error', 'ee', 'sem']);
+    for (let i = 0; i < headers.length; i++) {
+        const norm = headers[i].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]/g, '');
+        if (errNames.has(norm)) return i;
+    }
+    return -1;
+}
+
+function computeRowStats() {
+    const rows = document.querySelectorAll('#tableBody tr');
+    const yHeaders = getYHeaders();
+    const errIdx = findErrorColIndex(yHeaders);
+    let data = [];
+    rows.forEach(row => {
+        let xRaw = row.querySelector('.x-val').value;
+        let xNum = parseSmartNumber(xRaw);
+        let ysAll = [];
+        row.querySelectorAll('.y-val').forEach(inp => ysAll.push(parseSmartNumber(inp.value)));
+        const anyY = ysAll.some(v => !isNaN(v));
+        if (!anyY) return;
+
+        let ys, std, mean, n, hasExplicitError = false;
+        if (errIdx >= 0 && ysAll.length > 1) {
+            const errVal = ysAll[errIdx];
+            const valueYs = ysAll.filter((v, i) => i !== errIdx && !isNaN(v));
+            if (valueYs.length === 0) return;
+            mean = valueYs.reduce((a, b) => a + b, 0) / valueYs.length;
+            std = isNaN(errVal) ? 0 : Math.abs(errVal);
+            n = valueYs.length;
+            ys = valueYs;
+            hasExplicitError = true;
+        } else {
+            ys = ysAll.filter(v => !isNaN(v));
+            n = ys.length;
+            mean = ys.reduce((a, b) => a + b, 0) / n;
+            const variance = n > 1 ? ys.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (n - 1) : 0;
+            std = Math.sqrt(variance);
+        }
+        const cv = mean !== 0 ? (std / Math.abs(mean)) * 100 : 0;
+        data.push({ xRaw: xRaw.toString().trim(), x: xNum, ys, mean, std, cv, n, hasExplicitError });
+    });
+    return data;
+}
+
+function applyJoinStyle(ds, joinMode) {
+    ds.fill = false;
+    if (joinMode === 'none') { ds.showLine = false; }
+    else if (joinMode === 'straight') { ds.showLine = true; ds.tension = 0; }
+    else if (joinMode === 'monotone') { ds.showLine = true; ds.cubicInterpolationMode = 'monotone'; }
+    else if (joinMode === 'classic') { ds.showLine = true; ds.tension = 0.4; }
+}
+
+// ===================== REGRESIÓN UNIFICADA =====================
+
+function performRegressionUnified(data, model) {
+    if (model === 'linear') return polynomialRegression(data, 1, false);
+    if (model === 'linearZero') return polynomialRegression(data, 1, true);
+    if (model === 'poly2') return polynomialRegression(data, 2, false);
+    if (model === 'poly3') return polynomialRegression(data, 3, false);
+    if (model === 'michaelis') return fitMichaelis(data);
+    throw new Error('Modelo no reconocido: ' + model);
+}
+
+function fitMichaelis(data) {
+    let inv = data.map(p => ({ x: 1 / p.x, y: 1 / p.y })).filter(p => isFinite(p.x) && isFinite(p.y) && p.x !== 0);
+    if (inv.length < 2) return { type: 'michaelis', Vmax: 0, Km: 0, r2: 0, evalAt: () => 0, invertAt: () => null };
+    let ni = inv.length, siX = 0, siY = 0, siXY = 0, siX2 = 0;
+    inv.forEach(p => { siX += p.x; siY += p.y; siXY += p.x * p.y; siX2 += p.x * p.x; });
+    let mLB = (ni * siXY - siX * siY) / (ni * siX2 - siX * siX);
+    let bLB = (siY - mLB * siX) / ni;
+    const Vmax = 1 / bLB, Km = mLB * Vmax;
+    return {
+        type: 'michaelis', Vmax, Km, r2: 0,
+        evalAt: (S) => (Vmax * S) / (Km + S),
+        invertAt: (v) => (v > 0 && v < Vmax) ? (Km * v) / (Vmax - v) : null
+    };
+}
+
+function computeTrendlinePoints(res, minX, maxX) {
+    const steps = 80;
+    let line = [];
+    if (res.type === 'poly') {
+        for (let i = 0; i <= steps; i++) { const x = minX + (maxX - minX) * i / steps; line.push({ x, y: res.evalAt(x) }); }
+    } else if (res.type === 'michaelis') {
+        const lo = Math.max(minX, 1e-9);
+        for (let i = 0; i <= steps; i++) { const x = lo + (maxX - lo) * i / steps; line.push({ x, y: res.evalAt(x) }); }
+    }
+    return line;
+}
+
+function addTrendlineFromFit(datasets, pts, res, color, label, dash, width) {
+    if (!res) return;
+    dash = dash || [5, 5];
+    width = width || 2;
+    let minX = pts[0].x, maxX = pts[pts.length - 1].x;
+    // pointStyle aquí solo controla el ícono de la leyenda (usePointStyle:true); no hay puntos
+    // visibles en la línea (pointRadius:0), así que usamos 'line'/'dash' para representar el trazo.
+    const legendPointStyle = (dash.length === 0) ? 'line' : 'dash';
+    const ds = {
+        label: label, data: computeTrendlinePoints(res, minX, maxX), borderColor: color, borderWidth: width,
+        borderDash: dash, pointRadius: 0, showLine: true, type: 'line', fill: false, tension: 0,
+        pointStyle: legendPointStyle,
+        _trendlineFit: res
+    };
+    datasets.push(ds);
+}
+
+function computeBandPoints(res, tcrit, sign, minX, maxX) {
+    const steps = 80;
+    let arr = [];
+    for (let i = 0; i <= steps; i++) {
+        const x = minX + (maxX - minX) * i / steps;
+        const yhat = res.evalAt(x);
+        const se = Math.sqrt(Math.max(res.varAt(x), 0));
+        arr.push({ x, y: yhat + sign * tcrit * se });
+    }
+    return arr;
+}
+
+function addConfidenceBand(datasets, pts, res, color) {
+    if (res.type !== 'poly' || res.df < 1) return;
+    const tcrit = tCritical(0.95, res.df);
+    if (!Number.isFinite(tcrit)) return;
+    let minX = pts[0].x, maxX = pts[pts.length - 1].x;
+    const rgba = hexToRgba(color, 0.15);
+    const upperDs = { label: 'IC 95% (superior)', data: computeBandPoints(res, tcrit, 1, minX, maxX), borderColor: 'transparent', backgroundColor: rgba, pointRadius: 0, type: 'line', fill: '+1', tension: 0, order: 10, _bandFit: res, _bandTcrit: tcrit, _bandSign: 1 };
+    const lowerDs = { label: 'IC 95% (inferior)', data: computeBandPoints(res, tcrit, -1, minX, maxX), borderColor: 'transparent', backgroundColor: rgba, pointRadius: 0, type: 'line', fill: false, tension: 0, order: 10, _bandFit: res, _bandTcrit: tcrit, _bandSign: -1 };
+    datasets.push(upperDs, lowerDs);
+}
+
+// Tras el primer render, Chart.js ya calculó el rango visible real de los ejes.
+// Volvemos a trazar tendencia y banda desde ese rango (no solo el rango de los datos)
+// para que la línea llegue hasta el borde del gráfico (p. ej. toque el eje Y si el
+// modelo se forzó a pasar por 0,0), tal como se solicitó.
+function extendTrendlinesToAxisRange() {
+    if (!myChart || !myChart.scales || !myChart.scales.x) return;
+    const xMin = myChart.scales.x.min, xMax = myChart.scales.x.max;
+    if (!Number.isFinite(xMin) || !Number.isFinite(xMax) || xMax <= xMin) return;
+    let changed = false;
+    myChart.data.datasets.forEach(ds => {
+        if (ds._trendlineFit) { ds.data = computeTrendlinePoints(ds._trendlineFit, xMin, xMax); changed = true; }
+        if (ds._bandFit) { ds.data = computeBandPoints(ds._bandFit, ds._bandTcrit, ds._bandSign, xMin, xMax); changed = true; }
+    });
+    if (changed) myChart.update();
+}
+
+function buildResidualsData(pts, res, xLabelsMaybe) {
+    if (res.type !== 'poly') return null;
+    const points = pts.map((p, i) => {
+        const yhat = res.evalAt(p.x);
+        const resid = p.y - yhat;
+        const x0vec = res.cols.map(k => Math.pow(p.x - res.xMean, k));
+        let h = 0;
+        for (let a = 0; a < res.cols.length; a++) for (let b = 0; b < res.cols.length; b++) h += x0vec[a] * res.XtXinv[a][b] * x0vec[b];
+        const studRes = res.s > 0 ? resid / (res.s * Math.sqrt(Math.max(1 - h, 1e-9))) : 0;
+        return { x: p.x, resid, studRes, label: (xLabelsMaybe && xLabelsMaybe[i] !== undefined) ? xLabelsMaybe[i] : p.x.toString() };
+    });
+    return { points };
+}
+
+function makeResultCard(title, res, model) {
+    let html = `<div class="result-card"><h4>${title}</h4>`;
+    if (res.type === 'poly') {
+        const terms = [];
+        for (let j = res.coeffs.length - 1; j >= 0; j--) {
+            const c = res.coeffs[j];
+            if (Math.abs(c) < 1e-10 && res.coeffs.length > 1) continue;
+            const sign = c >= 0 ? (terms.length ? ' + ' : '') : ' - ';
+            const absC = Math.abs(c).toFixed(4);
+            const power = j === 0 ? '' : (j === 1 ? 'x' : `x^${j}`);
+            terms.push(sign + absC + power);
+        }
+        const eq = 'y = ' + (terms.join('') || '0');
+        html += `<div style="font-family:monospace; font-weight:bold; margin:5px 0;">${eq}</div>`;
+        html += `<div>R² = ${res.r2.toFixed(4)}</div>`;
+        html += `<div style="font-size:0.85em; color:#666;">Error estándar residual (s) = ${res.s.toFixed(4)} · g.l. = ${res.df}</div>`;
+        if (model === 'linearZero') html += `<small>(Intercepto forzado a 0)</small>`;
+    } else if (res.type === 'michaelis') {
+        html += `<div>Vmax = ${res.Vmax.toFixed(4)}</div><div>Km = ${res.Km.toFixed(4)}</div>`;
+    }
+    return html + `</div>`;
+}
+
+function renderMathFormulas(model) {
+    let container = document.getElementById('regressionFormulas');
+    let html = "";
+    if (model === 'linear') {
+        html = `<div class="formula-item"><strong>Modelo: $y = mx + b$</strong></div><div class="formula-item">$$ m = \\frac{n\\sum xy - \\sum x \\sum y}{n\\sum x^2 - (\\sum x)^2} $$</div><div class="formula-item">$$ b = \\bar{y} - m\\bar{x} $$</div><div class="formula-item">$$ R^2 = 1 - \\frac{SS_{res}}{SS_{tot}} $$</div>`;
+    } else if (model === 'linearZero') {
+        html = `<div class="formula-item"><strong>Modelo: $y = mx$ (Paso por cero)</strong></div><div class="formula-item">$$ m = \\frac{\\sum (xy)}{\\sum (x^2)} $$</div><div class="formula-item">$$ b = 0 \\quad (Forzado) $$</div>`;
+    } else if (model === 'poly2' || model === 'poly3') {
+        const deg = model === 'poly2' ? 2 : 3;
+        html = `<div class="formula-item"><strong>Modelo: $y = a_0 + a_1x + \\dots + a_${deg}x^${deg}$</strong></div><div class="formula-item">Ajuste por mínimos cuadrados (forma matricial): $$ \\hat{\\beta} = (X^TX)^{-1}X^Ty $$</div>`;
+    } else if (model === 'michaelis') {
+        html = `<div class="formula-item"><strong>Modelo Michaelis-Menten:</strong>$$ v = \\frac{V_{max}[S]}{K_m + [S]} $$</div><div class="formula-item">Linealización (Lineweaver-Burk):$$ \\frac{1}{v} = \\frac{K_m}{V_{max}} \\cdot \\frac{1}{[S]} + \\frac{1}{V_{max}} $$</div>`;
+    } else if (model === 'none') {
+        html = `<div class="formula-item"><strong>Sin modelo de regresión:</strong> los puntos se conectan por interpolación (recta o curva suave), sin ajustar una ecuación.</div>`;
+    }
+    const ciBox = document.getElementById('chkConfidenceBand');
+    if (ciBox && ciBox.checked && !ciBox.disabled) {
+        html += `<div class="formula-item"><strong>Banda de confianza 95% (respuesta media):</strong> $$ \\hat{y}(x_0) \\pm t_{0.975,\\,gl} \\cdot s\\sqrt{x_0^{T}(X^TX)^{-1}x_0} $$</div>`;
+    }
+    container.innerHTML = html;
+}
+
+function fillStatsTable(data) {
+    document.getElementById('statsTableContainer').style.display = 'block';
+    const errNote = (data[0] && data[0].hasExplicitError) ? ' (columna de error)' : '';
+    let html = `<thead><tr><th>X</th><th>Promedio</th><th>Desv. Std${errNote}</th><th>CV (%)</th></tr></thead><tbody>`;
+    data.forEach(d => {
+        let style = d.cv > 20 ? 'color:red; font-weight:bold;' : (d.cv > 10 ? 'color:orange;' : 'color:green;');
+        const label = (d.xRaw !== undefined && d.xRaw !== '') ? d.xRaw : d.x;
+        html += `<tr><td>${label}</td><td>${d.mean.toFixed(4)}</td><td>${d.std.toFixed(4)}</td><td style="${style}">${d.cv.toFixed(2)}%</td></tr>`;
+    });
+    document.getElementById('statsTable').innerHTML = html + "</tbody>";
+}
+
+function checkRecommendations(data) {
+    let bad = data.filter(d => d.cv > 20).length;
+    let div = document.getElementById('recommendationsContainer');
+    if (bad > 0) div.innerHTML = `<div class="recommendation-box bad">⚠️ <strong>Advertencia:</strong> Hay ${bad} puntos con coeficiente de variación > 20%.</div>`;
+    else div.innerHTML = `<div class="recommendation-box good">✅ <strong>Datos Excelentes:</strong> Baja variabilidad en réplicas.</div>`;
+}
+
+// ===================== LÍNEAS DE REFERENCIA (chartjs-plugin-annotation, opcional) =====================
+
+let refLineIdCounter = 1;
+
+function addReferenceLine() {
+    const type = document.getElementById('refLineType').value;
+    const valueRaw = document.getElementById('refLineValue').value;
+    const value = parseSmartNumber(valueRaw);
+    if (isNaN(value)) { alert('Ingresa un valor numérico para la línea de referencia.'); return; }
+    const label = document.getElementById('refLineLabel').value.trim();
+    const color = document.getElementById('refLineColor').value.trim() || '#e74c3c';
+    referenceLines.push({ id: refLineIdCounter++, type, value, label, color });
+    document.getElementById('refLineValue').value = '';
+    document.getElementById('refLineLabel').value = '';
+    renderRefLineList();
+    rerenderChartOnly();
+}
+
+function removeReferenceLine(id) {
+    referenceLines = referenceLines.filter(rl => rl.id !== id);
+    renderRefLineList();
+    rerenderChartOnly();
+}
+
+function renderRefLineList() {
+    const ul = document.getElementById('refLineList');
+    ul.innerHTML = '';
+    referenceLines.forEach(rl => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="swatch" style="background:${rl.color};"></span> ${rl.type === 'vertical' ? 'Vertical' : 'Horizontal'} en ${rl.value} ${rl.label ? '(' + rl.label + ')' : ''} <button class="danger small" onclick="removeReferenceLine(${rl.id})">✕</button>`;
+        ul.appendChild(li);
+    });
+}
+
+function buildAnnotationConfig() {
+    if (!annotationAvailable || referenceLines.length === 0) return undefined;
+    const annotations = {};
+    referenceLines.forEach(rl => {
+        annotations['refline_' + rl.id] = {
+            type: 'line',
+            scaleID: rl.type === 'vertical' ? 'x' : 'y',
+            value: rl.value,
+            borderColor: rl.color,
+            borderWidth: 2,
+            borderDash: [6, 4],
+            label: {
+                display: !!rl.label,
+                content: rl.label,
+                position: 'end',
+                backgroundColor: rl.color,
+                color: '#fff',
+                font: { size: 11 }
+            }
+        };
+    });
+    return { annotations };
+}
+
+function buildZoomConfig() {
+    if (!zoomAvailable) return undefined;
+    return {
+        pan: { enabled: true, mode: 'xy', modifierKey: 'shift' },
+        zoom: {
+            wheel: { enabled: true },
+            pinch: { enabled: true },
+            drag: { enabled: true, backgroundColor: 'rgba(52,152,219,0.15)', borderColor: 'rgba(52,152,219,0.4)' },
+            mode: 'xy'
+        }
+    };
+}
+
+function resetZoom() {
+    if (myChart && typeof myChart.resetZoom === 'function') myChart.resetZoom();
+}
+
+function rerenderChartOnly() {
+    if (!myChart || !myChart.options.plugins) return;
+    myChart.options.plugins.annotation = buildAnnotationConfig();
+    myChart.update();
+}
+
+// ===================== CONSTRUCCIÓN DE GRÁFICOS =====================
+
+function buildChart(datasets, opts) {
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    if (myChart) myChart.destroy();
+    myChart = new Chart(ctx, {
+        data: { datasets },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'nearest', intersect: false },
+            plugins: {
+                title: { display: true, text: opts.title, font: { size: 18 } },
+                legend: { labels: { usePointStyle: true, pointStyleWidth: 12, filter: item => !['Error', 'IC 95% (superior)', 'IC 95% (inferior)', 'Guía'].includes(item.text) } },
+                tooltip: { callbacks: { label: (c) => `${c.dataset.label}: (${formatNum(c.parsed.x)}, ${formatNum(c.parsed.y)})` } },
+                annotation: buildAnnotationConfig(),
+                zoom: buildZoomConfig(),
+                cartesianAxis: { mode: opts.axisEmphasisMode || 'auto' }
+            },
+            scales: {
+                x: { type: opts.xScaleType || 'linear', position: 'bottom', title: { display: true, text: opts.xTitle, font: { weight: 'bold' } } },
+                y: { type: opts.yScaleType || 'linear', title: { display: true, text: opts.yTitle, font: { weight: 'bold' } } }
+            }
+        },
+        plugins: [errorBarPlugin, cartesianAxisPlugin]
+    });
+    extendTrendlinesToAxisRange();
+}
+
+function buildBarChart(datasets, categories, opts) {
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    if (myChart) myChart.destroy();
+    const indexAxis = opts.orientation === 'horizontal' ? 'y' : 'x';
+    const valueScaleKey = indexAxis === 'y' ? 'x' : 'y';
+    const catScaleKey = indexAxis === 'y' ? 'y' : 'x';
+
+    const scalesConfig = {};
+    scalesConfig[catScaleKey] = { type: 'category', title: { display: true, text: indexAxis === 'y' ? opts.yTitle : opts.xTitle, font: { weight: 'bold' } } };
+    scalesConfig[valueScaleKey] = { type: (opts.valueScaleType === 'logarithmic' ? 'logarithmic' : 'linear'), title: { display: true, text: indexAxis === 'y' ? opts.xTitle : opts.yTitle, font: { weight: 'bold' } } };
+
+    myChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: categories, datasets },
+        options: {
+            indexAxis,
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                title: { display: true, text: opts.title, font: { size: 18 } },
+                tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${formatNum(c.parsed[valueScaleKey])}` } },
+                annotation: buildAnnotationConfig(),
+                zoom: buildZoomConfig()
+            },
+            scales: scalesConfig
+        },
+        plugins: [errorBarPlugin]
+    });
+}
+
+function renderResidualsChart(residualsData) {
+    const ctx = document.getElementById('residualsChart').getContext('2d');
+    if (residualsChart) residualsChart.destroy();
+    const pts = residualsData.points;
+    const xs = pts.map(p => p.x);
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const colorsArr = pts.map(p => Math.abs(p.studRes) > 3 ? '#e74c3c' : (Math.abs(p.studRes) > 2 ? '#e67e22' : '#3498db'));
+    residualsChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                { label: 'Línea cero', data: [{ x: minX, y: 0 }, { x: maxX, y: 0 }], type: 'line', borderColor: '#bbb', borderDash: [4, 4], pointRadius: 0, fill: false },
+                { label: 'Residual estandarizado', data: pts.map(p => ({ x: p.x, y: p.studRes })), backgroundColor: colorsArr, pointRadius: 6 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, title: { display: true, text: 'Residuales estandarizados vs X (±2 = alerta, ±3 = posible atípico)', font: { size: 13 } } },
+            scales: { x: { type: 'linear', title: { display: true, text: 'X' } }, y: { title: { display: true, text: 'Residual est.' } } }
         }
     });
 
-    function rebuildTable(matrix, hasHeader) {
-        if(matrix.length < 1) return;
-        const numCols = matrix[0].length;
-        if(numCols < 2) return alert("Se necesitan al menos 2 columnas (X, Y).");
-
-        // Configurar Headers
-        const headerRow = document.getElementById('tableHeader');
-        while(headerRow.children.length > 1) headerRow.removeChild(headerRow.lastChild);
-        
-        colCount = numCols - 1;
-        for(let i=0; i<colCount; i++) {
-            let th = document.createElement('th');
-            // Si hay header, tomamos el valor. Si no, generamos Y1, Y2...
-            let val = hasHeader ? matrix[0][i+1] : `Y${i+1}`;
-            th.innerHTML = `<input type="text" value="${val}" class="cell-input" style="color:white; font-weight:bold;">`;
-            headerRow.appendChild(th);
-        }
-        if(hasHeader) document.getElementById('headerX').value = matrix[0][0];
-
-        // Llenar Datos
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
-        let start = hasHeader ? 1 : 0;
-
-        for(let i=start; i<matrix.length; i++) {
-            let rowData = matrix[i];
-            let tr = document.createElement('tr');
-            // Usamos type="text" en inputs para permitir escribir "1,5" y luego parsearlo
-            let html = `<td><input type="text" class="cell-input x-val" value="${rowData[0] || ''}"></td>`;
-            for(let j=0; j<colCount; j++) {
-                html += `<td><input type="text" class="cell-input y-val" data-col="${j}" value="${rowData[j+1] !== undefined ? rowData[j+1] : ''}"></td>`;
-            }
-            tr.innerHTML = html;
-            tbody.appendChild(tr);
-        }
-    }
-
-    function addRow() {
-        const tr = document.createElement('tr');
-        let html = `<td><input type="text" class="cell-input x-val"></td>`;
-        for(let i=0; i<colCount; i++) html += `<td><input type="text" class="cell-input y-val" data-col="${i}"></td>`;
-        tr.innerHTML = html;
-        document.getElementById('tableBody').appendChild(tr);
-    }
-
-    function addYColumn() {
-        colCount++;
-        let th = document.createElement('th');
-        th.innerHTML = `<input type="text" value="Y${colCount}" class="cell-input" style="color:white; font-weight:bold;">`;
-        document.getElementById('tableHeader').appendChild(th);
-        document.querySelectorAll('#tableBody tr').forEach(tr => {
-            let td = document.createElement('td');
-            td.innerHTML = `<input type="text" class="cell-input y-val" data-col="${colCount-1}">`;
-            tr.appendChild(td);
+    const outliers = pts.filter(p => Math.abs(p.studRes) > 2);
+    const listDiv = document.getElementById('outlierList');
+    if (outliers.length === 0) {
+        listDiv.innerHTML = '<p style="color:#27ae60; margin-top:10px;">✅ Ningún punto supera ±2 desviaciones estándar de residual.</p>';
+    } else {
+        let html = '<p style="margin-top:10px;"><strong>Puntos a revisar:</strong></p><ul>';
+        outliers.forEach(p => {
+            const cls = Math.abs(p.studRes) > 3 ? 'badge-outlier' : 'badge-warn';
+            html += `<li>X=${p.label}: residual estandarizado = <span class="${cls}">${p.studRes.toFixed(2)}</span> ${Math.abs(p.studRes) > 3 ? '(posible atípico)' : '(revisar)'}</li>`;
         });
+        html += '</ul>';
+        listDiv.innerHTML = html;
     }
+}
 
-    function clearData() {
-        document.getElementById('pasteArea').value = '';
-        document.getElementById('tableBody').innerHTML = '';
-        colCount = 1;
-        // Reset Headers
-        const h = document.getElementById('tableHeader');
-        while(h.children.length > 2) h.removeChild(h.lastChild);
-        document.getElementById('headerY1').value = "Y1";
-        document.getElementById('reportSection').style.display = 'none';
-        for(let i=0; i<4; i++) addRow();
-    }
+// ===================== ANÁLISIS PRINCIPAL =====================
 
-    // --- ANÁLISIS ---
-    function runAnalysis() {
-        // 1. Recolección y Limpieza de Datos
-        const rows = document.querySelectorAll('#tableBody tr');
-        let data = [];
-        
-        rows.forEach(row => {
-            let xRaw = row.querySelector('.x-val').value;
-            let x = parseSmartNumber(xRaw);
-            
-            if(isNaN(x)) return; // Saltar si X no es válido
+function runAnalysis() {
+    const chartType = document.getElementById('chartTypeSelect').value;
+    const rowStats = computeRowStats();
+    if (chartType === 'bars') runBarsAnalysis(rowStats);
+    else runScatterAnalysis(rowStats);
+}
 
-            let ys = [];
-            row.querySelectorAll('.y-val').forEach(inp => {
-                let yVal = parseSmartNumber(inp.value);
-                if(!isNaN(yVal)) ys.push(yVal);
-            });
+function runScatterAnalysis(rowStats) {
+    let data = rowStats.filter(d => !isNaN(d.x));
+    if (data.length < 2) return alert("Se requieren al menos 2 puntos válidos con X numérico.");
+    data.sort((a, b) => a.x - b.x);
+    currentAnalysisData = data;
+    currentRegressionResults = [];
+    interpolationResults = [];
+    document.getElementById('interpolationResultsContainer').innerHTML = '';
 
-            if(ys.length > 0) {
-                // Pre-cálculo estadístico por fila
-                let n = ys.length;
-                let mean = ys.reduce((a,b)=>a+b,0)/n;
-                let variance = n > 1 ? ys.reduce((a,b)=>a + Math.pow(b-mean, 2), 0) / (n-1) : 0;
-                let std = Math.sqrt(variance);
-                let cv = mean !== 0 ? (std / Math.abs(mean)) * 100 : 0;
-                data.push({ x, ys, mean, std, cv, n });
-            }
-        });
+    document.getElementById('reportSection').style.display = 'block';
+    document.getElementById('reportDate').innerText = new Date().toLocaleString();
+    const model = document.getElementById('modelSelect').value;
+    const useStats = document.getElementById('chkStats').checked;
+    const ciBox = document.getElementById('chkConfidenceBand');
+    const showCI = ciBox.checked && !ciBox.disabled;
+    const showResiduals = document.getElementById('chkResiduals').checked;
+    const joinMode = document.getElementById('joinSelect').value;
+    const customTitle = document.getElementById('customChartTitle').value;
+    const xTitle = document.getElementById('customXTitle').value;
+    const yTitle = document.getElementById('customYTitle').value;
 
-        if(data.length < 2) return alert("Se requieren al menos 2 puntos válidos.");
-        data.sort((a,b) => a.x - b.x);
+    let datasets = [];
+    let resultsHTML = "";
+    let fitForInterp = null;
+    let residualsData = null;
 
-        // 2. Preparación UI
-        document.getElementById('reportSection').style.display = 'block';
-        document.getElementById('reportDate').innerText = new Date().toLocaleString();
-        const model = document.getElementById('modelSelect').value;
-        const useStats = document.getElementById('chkStats').checked;
-        const customTitle = document.getElementById('customChartTitle').value;
-        const xTitle = document.getElementById('customXTitle').value;
-        const yTitle = document.getElementById('customYTitle').value;
-
-        // 3. Generación de Series (Datasets)
-        let datasets = [];
-        let resultsHTML = "";
-        
-        // Opción A: Promedios
-        if (useStats && colCount > 1) {
-            // Puntos Promedio
-            datasets.push({
-                label: 'Promedio Experimental',
-                data: data.map(d => ({x: d.x, y: d.mean})),
-                backgroundColor: 'black', borderColor: 'black',
-                pointRadius: 6, pointStyle: 'rectRot', type: 'scatter'
-            });
-            
-            // Barras de error (ahora más visibles)
-            data.forEach(d => {
-                if (d.std > 0) { // Solo graficar si hay desviación
-                    datasets.push({
-                        label: 'Error',
-                        data: [
-                            {x: d.x, y: d.mean - d.std}, 
-                            {x: d.x, y: d.mean + d.std}
-                        ],
-                        borderColor: 'rgba(231, 76, 60, 0.8)', // Un rojo suave para que resalte
-                        borderWidth: 2, // Más grueso
-                        showLine: true,
-                        pointRadius: 2, // Pequeños topes en los extremos
-                        pointBackgroundColor: 'rgba(231, 76, 60, 0.8)',
-                        type: 'line',
-                        fill: false,
-                        options: { animation: false }
-                    });
-                }
-            });
-
-            // Regresión al Promedio
-            let regData = data.map(d => ({x: d.x, y: d.mean}));
-            let res = performRegression(regData, model);
-            addTrendline(datasets, regData, res, 'black', 'Tendencia Promedio');
-            resultsHTML += makeResultCard("Ajuste (Promedios)", res, model);
-            
-            // Tabla y Avisos
-            fillStatsTable(data);
-            checkRecommendations(data);
-
-        } else {
-            // Opción B: Individuales
-            document.getElementById('statsTableContainer').style.display = 'none';
-            document.getElementById('recommendationsContainer').innerHTML = '';
-
-            for (let i = 0; i < colCount; i++) {
-                let pts = [];
-                data.forEach(d => {
-                    if (d.ys[i] !== undefined) pts.push({x: d.x, y: d.ys[i]});
-                });
-                
-                if(pts.length < 2) continue;
-
-                let colName = document.querySelectorAll('#tableHeader th input')[i+1].value;
-                let color = colors[i % colors.length];
-
-                datasets.push({
-                    label: colName,
-                    data: pts,
-                    backgroundColor: color, borderColor: color,
-                    pointRadius: 5, type: 'scatter'
-                });
-
-                // Regresión individual
-                let res = performRegression(pts, model);
-                addTrendline(datasets, pts, res, color, `Reg. ${colName}`);
-                resultsHTML += makeResultCard(colName, res, model);
-            }
-        }
-
-        // 4. Renderizar
-        document.getElementById('numericResults').innerHTML = resultsHTML;
-        renderMathFormulas(model);
-
-        const ctx = document.getElementById('mainChart').getContext('2d');
-        if(myChart) myChart.destroy();
-        
-        myChart = new Chart(ctx, {
-            data: { datasets },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: { display: true, text: customTitle, font: {size: 18} },
-                    legend: { labels: { filter: item => item.text !== 'Error' && !item.text.startsWith('Cap') } }
-                },
-                scales: {
-                    x: { type: 'linear', position: 'bottom', title: {display:true, text: xTitle, font:{weight:'bold'}} },
-                    y: { type: 'linear', title: {display:true, text: yTitle, font:{weight:'bold'}} }
-                }
-            }
-        });
-        
-        MathJax.typesetPromise();
-    }
-
-    // --- MATEMÁTICAS ---
-    function performRegression(data, model) {
-        let n = data.length;
-        let sX=0, sY=0, sXY=0, sX2=0;
-        data.forEach(p => { sX+=p.x; sY+=p.y; sXY+=p.x*p.y; sX2+=p.x*p.x; });
-
-        if(model === 'linearZero') {
-            let m = sXY / sX2;
-            // R2 sin intercepto
-            let ssRes = data.reduce((a,p) => a + Math.pow(p.y - m*p.x, 2), 0);
-            let ssTot = data.reduce((a,p) => a + Math.pow(p.y, 2), 0);
-            let r2 = 1 - (ssRes/ssTot);
-            return { m, b:0, r2, type: 'linearZero' };
-        } 
-        else if (model === 'linear') {
-            let m = (n*sXY - sX*sY) / (n*sX2 - sX*sX);
-            let b = (sY - m*sX) / n;
-            let yMean = sY/n;
-            let ssRes = data.reduce((a,p) => a + Math.pow(p.y - (m*p.x + b), 2), 0);
-            let ssTot = data.reduce((a,p) => a + Math.pow(p.y - yMean, 2), 0);
-            let r2 = 1 - (ssRes/ssTot);
-            return { m, b, r2, type: 'linear' };
-        }
-        else if (model === 'michaelis') {
-            // Lineweaver-Burk
-            let inv = data.map(p=>({x:1/p.x, y:1/p.y})).filter(p=>isFinite(p.x)&&isFinite(p.y)&&p.x!==0);
-            if(inv.length<2) return {Vmax:0,Km:0,r2:0,type:'michaelis'};
-            
-            // Regresión simple a los inversos
-            let ni=inv.length, siX=0, siY=0, siXY=0, siX2=0;
-            inv.forEach(p=>{siX+=p.x; siY+=p.y; siXY+=p.x*p.y; siX2+=p.x*p.x;});
-            let mLB = (ni*siXY - siX*siY)/(ni*siX2 - siX*siX);
-            let bLB = (siY - mLB*siX)/ni;
-            
-            return { Vmax: 1/bLB, Km: mLB*(1/bLB), r2:0, type:'michaelis' };
-        }
-    }
-
-    function addTrendline(datasets, pts, res, color, label) {
-        if(!res) return;
-        let minX = pts[0].x, maxX = pts[pts.length-1].x;
-        let line = [];
-        if(res.type.includes('linear')) {
-            line = [{x: minX, y: res.m*minX+res.b}, {x: maxX, y: res.m*maxX+res.b}];
-        } else if (res.type === 'michaelis') {
-            for(let x=0; x<=maxX; x+=maxX/40) line.push({x, y: (res.Vmax*x)/(res.Km+x)});
-        }
+    if (useStats && colCount > 1) {
+        const avgColor = document.getElementById('avgSeriesColor').value || '#000000';
+        const avgShape = document.getElementById('avgSeriesShape').value || 'rectRot';
+        const avgDash = getLineDashArray(document.getElementById('avgLineStyle').value || 'dashed');
+        const avgWidth = parseInt(document.getElementById('avgLineWidth').value, 10) || 2;
         datasets.push({
-            label: label, data: line, borderColor: color, borderWidth: 2, 
-            borderDash: [5,5], pointRadius: 0, showLine: true, type: 'line'
+            label: 'Promedio Experimental',
+            data: data.map(d => ({ x: d.x, y: d.mean })),
+            backgroundColor: avgColor, borderColor: avgColor,
+            pointRadius: 6, pointStyle: avgShape, type: 'scatter',
+            _errorData: data.map(d => ({ x: d.x, y: d.mean, err: d.std })),
+            _errorColor: avgColor
         });
-    }
 
-    function makeResultCard(title, res, model) {
-        let html = `<div class="result-card"><h4>${title}</h4>`;
-        if(res.type.includes('linear')) {
-            let eq = `y = ${res.m.toFixed(4)}x`;
-            if(model==='linear' && res.b >= 0) eq += ` + ${res.b.toFixed(4)}`;
-            else if (model==='linear' && res.b < 0) eq += ` - ${Math.abs(res.b).toFixed(4)}`;
-            
-            html += `<div style="font-family:monospace; font-weight:bold; margin:5px 0;">${eq}</div>`;
-            html += `<div>R² = ${res.r2.toFixed(4)}</div>`;
-            if(model==='linearZero') html += `<small>(Intercepto forzado a 0)</small>`;
+        if (model === 'none') {
+            applyJoinStyle(datasets[0], joinMode);
+            datasets[0].borderDash = avgDash;
+            datasets[0].borderWidth = avgWidth;
         } else {
-            html += `<div>Vmax = ${res.Vmax.toFixed(4)}</div><div>Km = ${res.Km.toFixed(4)}</div>`;
+            let regData = data.map(d => ({ x: d.x, y: d.mean }));
+            let res = performRegressionUnified(regData, model);
+            currentRegressionResults.push({ name: 'Ajuste Promedios', res, model });
+            addTrendlineFromFit(datasets, regData, res, avgColor, 'Tendencia Promedio', avgDash, avgWidth);
+            if (showCI) addConfidenceBand(datasets, regData, res, avgColor);
+            resultsHTML += makeResultCard("Ajuste (Promedios)", res, model);
+            fitForInterp = { res, xMin: data[0].x, xMax: data[data.length - 1].x };
+            if (showResiduals) residualsData = buildResidualsData(regData, res, data.map(d => d.xRaw));
         }
-        return html + `</div>`;
-    }
+        fillStatsTable(data); checkRecommendations(data);
+    } else {
+        document.getElementById('statsTableContainer').style.display = 'none';
+        document.getElementById('recommendationsContainer').innerHTML = '';
 
-    // --- VISUALIZACIÓN EDUCATIVA ---
-    function renderMathFormulas(model) {
-        let container = document.getElementById('regressionFormulas');
-        let html = "";
-        
-        if (model === 'linear') {
-            html = `
-                <div class="formula-item">
-                    <strong>Modelo: $y = mx + b$</strong>
-                </div>
-                <div class="formula-item">
-                    $$ m = \\frac{n\\sum xy - \\sum x \\sum y}{n\\sum x^2 - (\\sum x)^2} $$
-                </div>
-                <div class="formula-item">
-                    $$ b = \\bar{y} - m\\bar{x} $$
-                </div>
-                <div class="formula-item">
-                    $$ R^2 = 1 - \\frac{SS_{res}}{SS_{tot}} $$
-                </div>
-            `;
-        } else if (model === 'linearZero') {
-            html = `
-                <div class="formula-item">
-                    <strong>Modelo: $y = mx$ (Paso por cero)</strong>
-                </div>
-                <div class="formula-item">
-                    $$ m = \\frac{\\sum (xy)}{\\sum (x^2)} $$
-                </div>
-                <div class="formula-item">
-                    $$ b = 0 \\quad (Forzado) $$
-                </div>
-            `;
-        } else if (model === 'michaelis') {
-            html = `
-                <div class="formula-item">
-                    <strong>Modelo Michaelis-Menten:</strong>
-                    $$ v = \\frac{V_{max}[S]}{K_m + [S]} $$
-                </div>
-                <div class="formula-item">
-                    Linealización (Lineweaver-Burk):
-                    $$ \\frac{1}{v} = \\frac{K_m}{V_{max}} \\cdot \\frac{1}{[S]} + \\frac{1}{V_{max}} $$
-                </div>
-            `;
+        const colHeaders = getYHeaders();
+        const colStyles = getColumnStyles();
+        for (let i = 0; i < colCount; i++) {
+            let pts = [];
+            data.forEach(d => { if (d.ys[i] !== undefined) pts.push({ x: d.x, y: d.ys[i] }); });
+            if (pts.length < 2) continue;
+            let colName = colHeaders[i] !== undefined ? colHeaders[i] : `Y${i + 1}`;
+            let style = colStyles[i] || { color: colors[i % colors.length], shape: 'circle', dash: [5, 5], width: 2 };
+            let color = style.color;
+            let ds = { label: colName, data: pts, backgroundColor: color, borderColor: color, pointRadius: 5, pointStyle: style.shape, type: 'scatter' };
+
+            if (model === 'none') {
+                applyJoinStyle(ds, joinMode);
+                ds.borderDash = style.dash;
+                ds.borderWidth = style.width;
+                datasets.push(ds);
+            } else {
+                datasets.push(ds);
+                let res = performRegressionUnified(pts, model);
+                currentRegressionResults.push({ name: colName, res, model });
+                addTrendlineFromFit(datasets, pts, res, color, `Reg. ${colName}`, style.dash, style.width);
+                if (showCI) addConfidenceBand(datasets, pts, res, color);
+                resultsHTML += makeResultCard(colName, res, model);
+                if (!fitForInterp) fitForInterp = { res, xMin: pts[0].x, xMax: pts[pts.length - 1].x };
+                if (showResiduals && !residualsData) residualsData = buildResidualsData(pts, res, pts.map(p => p.x.toString()));
+            }
         }
-        container.innerHTML = html;
     }
 
-    function fillStatsTable(data) {
-        document.getElementById('statsTableContainer').style.display = 'block';
-        let html = `<thead><tr><th>X</th><th>Promedio</th><th>Desv. Std</th><th>CV (%)</th></tr></thead><tbody>`;
-        data.forEach(d => {
-            let style = d.cv > 20 ? 'color:red; font-weight:bold;' : (d.cv > 10 ? 'color:orange;' : 'color:green;');
-            html += `<tr><td>${d.x}</td><td>${d.mean.toFixed(4)}</td><td>${d.std.toFixed(4)}</td><td style="${style}">${d.cv.toFixed(2)}%</td></tr>`;
+    document.getElementById('numericResults').innerHTML = resultsHTML;
+    renderMathFormulas(model);
+
+    lastAnalysisContext = {
+        chartType: 'scatter', model, fitForInterp,
+        rawSeries: (useStats && colCount > 1)
+            ? [{ label: 'Promedio', points: data.map(d => ({ x: d.x, y: d.mean })) }]
+            : Array.from({ length: colCount }, (_, i) => {
+                let pts = []; data.forEach(d => { if (d.ys[i] !== undefined) pts.push({ x: d.x, y: d.ys[i] }); });
+                return { label: getYHeaders()[i] || `Y${i + 1}`, points: pts };
+            }).filter(s => s.points.length >= 2)
+    };
+
+    buildChart(datasets, {
+        title: customTitle, xTitle, yTitle,
+        xScaleType: document.getElementById('xScaleType').value,
+        yScaleType: document.getElementById('yScaleType').value,
+        axisEmphasisMode: document.getElementById('axisEmphasisMode').value
+    });
+
+    if (showResiduals && residualsData) {
+        renderResidualsChart(residualsData);
+        document.getElementById('residualsSection').style.display = 'block';
+    } else {
+        document.getElementById('residualsSection').style.display = 'none';
+    }
+
+    if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
+}
+
+function runBarsAnalysis(rowStats) {
+    if (rowStats.length < 1) return alert("No hay datos válidos para graficar en modo Barras.");
+    currentAnalysisData = rowStats;
+    currentRegressionResults = [];
+    interpolationResults = [];
+    document.getElementById('interpolationResultsContainer').innerHTML = '';
+    document.getElementById('statsTableContainer').style.display = 'none';
+    document.getElementById('recommendationsContainer').innerHTML = '';
+    document.getElementById('residualsSection').style.display = 'none';
+    document.getElementById('numericResults').innerHTML = '';
+    document.getElementById('regressionFormulas').innerHTML = '<p style="color:#7f8c8d;">No aplica: el modo Barras no usa un modelo de regresión.</p>';
+
+    document.getElementById('reportSection').style.display = 'block';
+    document.getElementById('reportDate').innerText = new Date().toLocaleString();
+
+    const orientation = document.getElementById('orientationSelect').value;
+    const useStats = document.getElementById('chkStats').checked;
+    const customTitle = document.getElementById('customChartTitle').value;
+    const xTitle = document.getElementById('customXTitle').value;
+    const yTitle = document.getElementById('customYTitle').value;
+
+    const categories = rowStats.map(d => d.xRaw || d.x.toString());
+    let datasets = [];
+
+    if (useStats && colCount > 1) {
+        const avgColorBars = document.getElementById('avgSeriesColor').value || '#3498db';
+        datasets.push({ label: 'Promedio', data: rowStats.map(d => d.mean), backgroundColor: avgColorBars, _errorBar: rowStats.map(d => d.std), _errorColor: '#2c3e50' });
+        fillStatsTable(rowStats); checkRecommendations(rowStats);
+    } else {
+        const colHeaders = getYHeaders();
+        const colColorsArr = getColumnColors();
+        for (let i = 0; i < colCount; i++) {
+            let colName = colHeaders[i] !== undefined ? colHeaders[i] : `Y${i + 1}`;
+            let color = colColorsArr[i] || colors[i % colors.length];
+            datasets.push({ label: colName, data: rowStats.map(d => d.ys[i] !== undefined ? d.ys[i] : null), backgroundColor: color });
+        }
+    }
+
+    lastAnalysisContext = { chartType: 'bars' };
+
+    buildBarChart(datasets, categories, {
+        title: customTitle, xTitle, yTitle, orientation,
+        valueScaleType: (orientation === 'horizontal' ? document.getElementById('xScaleType').value : document.getElementById('yScaleType').value)
+    });
+
+    if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
+}
+
+// ===================== INTERPOLACIÓN DE MUESTRAS =====================
+
+function runInterpolation() {
+    if (!lastAnalysisContext) { alert('Ejecuta primero el análisis (paso 3).'); return; }
+    if (lastAnalysisContext.chartType !== 'scatter') { alert('La interpolación solo está disponible en modo Dispersión/Curva.'); return; }
+
+    const direction = document.getElementById('interpDirection').value;
+    const raw = document.getElementById('interpValues').value.trim();
+    if (!raw) return;
+    const values = raw.split('\n').map(s => parseSmartNumber(s)).filter(v => !isNaN(v));
+    if (values.length === 0) { alert('No se reconocieron valores numéricos válidos.'); return; }
+
+    const model = lastAnalysisContext.model;
+    const results = [];
+
+    values.forEach(v => {
+        if (model === 'none') {
+            const series = lastAnalysisContext.rawSeries[0];
+            if (!series || series.points.length < 2) { results.push({ input: v, direction, output: null, note: 'Sin datos suficientes' }); return; }
+            const pts = [...series.points].sort((a, b) => a.x - b.x);
+            const joinModeSel = document.getElementById('joinSelect').value;
+            const interpMode = joinModeSel === 'straight' ? 'straight' : 'monotone';
+            if (direction === 'x2y') {
+                const y = interpolateY(pts, v, interpMode);
+                results.push({ input: v, direction, output: y, note: y === null ? 'Fuera del rango de datos' : '', x: v, y });
+            } else {
+                const f = (x) => { const yy = interpolateY(pts, x, interpMode); return yy === null ? NaN : yy; };
+                const roots = findAllRoots(f, pts[0].x, pts[pts.length - 1].x, v, 400);
+                if (roots.length === 0) results.push({ input: v, direction, output: null, note: 'Sin solución en el rango de datos' });
+                else roots.forEach(r => results.push({ input: v, direction, output: r, note: roots.length > 1 ? `(${roots.length} soluciones encontradas)` : '', x: r, y: v }));
+            }
+        } else {
+            const fit = lastAnalysisContext.fitForInterp;
+            if (!fit) { results.push({ input: v, direction, output: null, note: 'No hay ajuste disponible' }); return; }
+            const res = fit.res;
+            if (direction === 'x2y') {
+                const y = res.evalAt(v);
+                results.push({ input: v, direction, output: y, note: '', x: v, y });
+            } else {
+                if (res.type === 'michaelis') {
+                    const x = res.invertAt(v);
+                    results.push({ input: v, direction, output: x, note: x === null ? 'Fuera de rango fisiológico (v ≥ Vmax o ≤ 0)' : '', x, y: v });
+                } else if (res.degree === 1) {
+                    const a1 = res.coeffs[1], a0 = res.coeffs[0];
+                    if (Math.abs(a1) < 1e-12) { results.push({ input: v, direction, output: null, note: 'Pendiente ≈ 0, no se puede invertir' }); return; }
+                    const x = (v - a0) / a1;
+                    results.push({ input: v, direction, output: x, note: '', x, y: v });
+                } else {
+                    const margin = (fit.xMax - fit.xMin) * 0.25 || 1;
+                    const roots = findAllRoots((x) => res.evalAt(x), fit.xMin - margin, fit.xMax + margin, v, 600);
+                    if (roots.length === 0) results.push({ input: v, direction, output: null, note: 'Sin solución real en el rango explorado' });
+                    else roots.forEach(r => results.push({ input: v, direction, output: r, note: roots.length > 1 ? `(${roots.length} soluciones encontradas)` : '', x: r, y: v }));
+                }
+            }
+        }
+    });
+
+    interpolationResults = interpolationResults.concat(results);
+    renderInterpolationResults();
+    plotInterpolationMarkers();
+}
+
+function renderInterpolationResults() {
+    const container = document.getElementById('interpolationResultsContainer');
+    if (interpolationResults.length === 0) { container.innerHTML = ''; return; }
+    let html = `<div class="data-table-wrapper" style="margin-top:15px;"><table><thead><tr>
+        <th>Valor de entrada</th><th>Dirección</th><th>Resultado</th><th>Nota</th></tr></thead><tbody>`;
+    interpolationResults.forEach(r => {
+        const dirLabel = r.direction === 'y2x' ? 'Y → X' : 'X → Y';
+        html += `<tr><td>${formatNum(r.input)}</td><td>${dirLabel}</td><td><strong>${r.output === null ? '—' : formatNum(r.output)}</strong></td><td>${r.note || ''}</td></tr>`;
+    });
+    html += `</tbody></table></div>
+    <div style="text-align:right; margin-top:8px;"><button class="secondary small" onclick="clearInterpolation()">🗑️ Limpiar interpolaciones</button></div>`;
+    container.innerHTML = html;
+}
+
+function clearInterpolation() {
+    interpolationResults = [];
+    renderInterpolationResults();
+    if (myChart) {
+        myChart.data.datasets = myChart.data.datasets.filter(ds => !ds._isInterpMarker && !ds._isInterpGuide);
+        myChart.update();
+    }
+}
+
+function plotInterpolationMarkers() {
+    if (!myChart || !lastAnalysisContext || lastAnalysisContext.chartType !== 'scatter') return;
+    myChart.data.datasets = myChart.data.datasets.filter(ds => !ds._isInterpMarker && !ds._isInterpGuide);
+
+    const validPts = interpolationResults.filter(r => r.output !== null && r.x != null && r.y != null);
+    if (validPts.length === 0) { myChart.update(); return; }
+
+    const xMin = myChart.scales.x.min, yMin = myChart.scales.y.min;
+
+    validPts.forEach(p => {
+        myChart.data.datasets.push({ label: 'Guía', type: 'line', data: [{ x: xMin, y: p.y }, { x: p.x, y: p.y }], borderColor: '#e67e22', borderDash: [3, 3], borderWidth: 1, pointRadius: 0, fill: false, _isInterpGuide: true });
+        myChart.data.datasets.push({ label: 'Guía', type: 'line', data: [{ x: p.x, y: yMin }, { x: p.x, y: p.y }], borderColor: '#e67e22', borderDash: [3, 3], borderWidth: 1, pointRadius: 0, fill: false, _isInterpGuide: true });
+    });
+    myChart.data.datasets.push({
+        label: 'Muestra interpolada', type: 'scatter', data: validPts.map(p => ({ x: p.x, y: p.y })),
+        backgroundColor: '#e67e22', borderColor: '#ba5f0f', pointStyle: 'star', pointRadius: 9, pointHoverRadius: 11, _isInterpMarker: true
+    });
+    myChart.update();
+}
+
+// ===================== EXPORTAR =====================
+
+function downloadImage() {
+    let a = document.createElement('a');
+    a.href = document.getElementById('mainChart').toDataURL();
+    a.download = 'grafico_analisis.png';
+    a.click();
+}
+
+function exportCSV() {
+    let csv = [];
+    const chartType = lastAnalysisContext ? lastAnalysisContext.chartType : 'scatter';
+    let useStats = document.getElementById('chkStats').checked && currentAnalysisData.length > 0 && colCount > 1;
+
+    let headers = [document.getElementById('headerX').value];
+    headers = headers.concat(getYHeaders());
+    if (useStats) headers.push("Promedio", "Desv. Std", "CV (%)");
+    csv.push(headers.join(","));
+
+    document.querySelectorAll('#tableBody tr').forEach(tr => {
+        let row = [];
+        let xRaw = tr.querySelector('.x-val').value;
+        let xVal = parseSmartNumber(xRaw);
+        tr.querySelectorAll('input').forEach(inp => row.push(inp.value));
+
+        if (useStats) {
+            let stats = currentAnalysisData.find(d => (chartType === 'bars' ? d.xRaw === xRaw.trim() : d.x === xVal));
+            if (stats) {
+                row.push(stats.mean.toFixed(4));
+                row.push(stats.std.toFixed(4));
+                row.push(stats.cv.toFixed(2));
+            } else { row.push("", "", ""); }
+        }
+        csv.push(row.join(","));
+    });
+
+    if (currentRegressionResults.length > 0) {
+        csv.push("");
+        csv.push("--- RESULTADOS DE REGRESION ---");
+        currentRegressionResults.forEach(item => {
+            csv.push(`Serie: ${item.name}`);
+            let r = item.res;
+            if (r.type === 'poly') {
+                csv.push(`Modelo, ${item.model}`);
+                r.coeffs.forEach((c, i) => csv.push(`a${i}, ${c.toFixed(6)}`));
+                csv.push(`R^2, ${r.r2.toFixed(4)}`);
+                csv.push(`Error estandar (s), ${r.s.toFixed(6)}`);
+            } else if (r.type === 'michaelis') {
+                csv.push(`Modelo, Michaelis-Menten`); csv.push(`Vmax, ${r.Vmax.toFixed(4)}`); csv.push(`Km, ${r.Km.toFixed(4)}`);
+            }
+            csv.push("");
         });
-        document.getElementById('statsTable').innerHTML = html + "</tbody>";
     }
 
-    function checkRecommendations(data) {
-        let bad = data.filter(d => d.cv > 20).length;
-        let div = document.getElementById('recommendationsContainer');
-        if(bad > 0) div.innerHTML = `<div class="recommendation-box bad">⚠️ <strong>Advertencia:</strong> Hay ${bad} puntos con coeficiente de variación > 20%.</div>`;
-        else div.innerHTML = `<div class="recommendation-box good">✅ <strong>Datos Excelentes:</strong> Baja variabilidad en réplicas.</div>`;
-    }
-
-    // --- UTILIDADES ---
-    function downloadImage() { 
-        let a = document.createElement('a'); 
-        a.href = document.getElementById('mainChart').toDataURL(); 
-        a.download = 'grafico_analisis.png'; 
-        a.click(); 
-    }
-    
-    function exportCSV() {
-        let csv = [];
-        // Headers
-        let headers = [];
-        document.querySelectorAll('#tableHeader th input').forEach(inp => headers.push(inp.value));
-        csv.push(headers.join(","));
-        
-        // Rows
-        document.querySelectorAll('#tableBody tr').forEach(tr => {
-            let row = [];
-            tr.querySelectorAll('input').forEach(inp => row.push(inp.value));
-            csv.push(row.join(","));
+    if (interpolationResults.length > 0) {
+        csv.push("");
+        csv.push("--- RESULTADOS DE INTERPOLACION ---");
+        csv.push("Valor de entrada,Direccion,Resultado,Nota");
+        interpolationResults.forEach(r => {
+            csv.push(`${r.input},${r.direction === 'y2x' ? 'Y->X' : 'X->Y'},${r.output === null ? '' : r.output.toFixed(6)},"${r.note || ''}"`);
         });
-        
-        let blob = new Blob([csv.join("\n")], {type: 'text/csv'});
-        let url = URL.createObjectURL(blob);
-        let a = document.createElement('a'); a.href = url; a.download = 'datos_exportados.csv'; a.click();
     }
+
+    let csvContent = '\uFEFF' + csv.join("\n");
+    let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = 'analisis_experimental.csv';
+    a.click();
+}
 </script>
 </body>
 </html>
